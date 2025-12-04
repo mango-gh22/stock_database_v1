@@ -1,0 +1,17 @@
+# 数据库与驱动
+sqlalchemy>=1.4.0
+pymysql>=1.0.0
+
+# 数据处理
+pandas>=1.3.0
+numpy>=1.21.0
+
+# 配置管理
+pyyaml>=6.0
+
+# 数据源 (P3阶段开始使用)
+baostock>=0.8.0
+akshare>=1.9.0
+
+# 其他工具
+python-dateutil>=2.8.0
