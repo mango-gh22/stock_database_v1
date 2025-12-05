@@ -9,3 +9,11 @@ database:
   backup:
     enabled: true
     path: "./data/backup"
+
+  # 连接池配置（可选）
+  pool_name: "stock_pool"
+  pool_size: 5
+
+  # 其他选项
+  charset: "utf8mb4"
+  autocommit: true

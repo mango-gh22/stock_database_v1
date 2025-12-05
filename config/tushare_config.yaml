@@ -1,0 +1,17 @@
+# config/tushare_config.yaml
+# 这是Tushare API的配置文件
+# 注意：真正的Token应存储在.env文件或系统环境变量中
+
+tushare:
+  # API密钥（通过环境变量或.env文件注入）
+  api_key: "${TUSHARE_TOKEN}"  # 这表示从环境变量读取
+  endpoints:
+    daily: "daily"
+    basic_info: "stock_basic"
+    minute: "stk_mins"
+  rate_limit: 500  # 每分钟请求限制
+  retry_times: 3
+  timeout: 30
+
+# 提醒开发者配置Token的注释
+_comment: "请在项目根目录的.env文件中设置 TUSHARE_TOKEN=你的实际token"

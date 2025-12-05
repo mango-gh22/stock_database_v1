@@ -1,26 +1,54 @@
-symbol_pools:
-  csi_a50:
-    name: "中证A50指数成分股"
-    symbols:
-      - "sh600519" # 贵州茅台
-      - "sz000858" # 五粮液
-      - "sh601318" # 中国平安
-      - "sz000333" # 美的集团
-      - "sz000002" # 万科A
-      - "sh600036" # 招商银行
-      - "sh600030" # 中信证券
-      - "sh601166" # 兴业银行
-      - "sh601328" # 交通银行
-      - "sz002415" # 海康威视
-      - "sz002475" # 立讯精密
-      - "sh600276" # 恒瑞医药
-      - "sh600887" # 伊利股份
-      - "sz000568" # 泸州老窖
-      - "sh601888" # 中国中免
-      - "sz002714" # 牧原股份
-      - "sz300760" # 迈瑞医疗
-      - "sh603288" # 海天味业
-      - "sz300124" # 汇川技术
-      - "sh601012" # 隆基绿能
-    start_date: "2015-01-01"
-    priority: 1
+# config/symbols.yaml
+# 中证A50指数成分股（示例数据）
+
+csi_a50:
+  - symbol: "000001.SZ"
+    name: "平安银行"
+    industry: "银行"
+    list_date: "1991-04-03"
+    weight: 2.5
+    area: "广东"
+    market: "主板"
+    fullname: "平安银行股份有限公司"
+  
+  - symbol: "000002.SZ"
+    name: "万科A"
+    industry: "房地产"
+    list_date: "1991-01-29"
+    weight: 2.0
+    area: "广东"
+    market: "主板"
+    fullname: "万科企业股份有限公司"
+  
+  - symbol: "600519.SH"
+    name: "贵州茅台"
+    industry: "白酒"
+    list_date: "2001-08-27"
+    weight: 5.0
+    area: "贵州"
+    market: "主板"
+    fullname: "贵州茅台酒股份有限公司"
+  
+  - symbol: "000858.SZ"
+    name: "五粮液"
+    industry: "白酒"
+    list_date: "1998-04-27"
+    weight: 3.0
+    area: "四川"
+    market: "主板"
+    fullname: "宜宾五粮液股份有限公司"
+  
+  - symbol: "600036.SH"
+    name: "招商银行"
+    industry: "银行"
+    list_date: "2002-04-09"
+    weight: 2.8
+    area: "广东"
+    market: "主板"
+    fullname: "招商银行股份有限公司"
+  
+  # 更多股票可以继续添加...
+
+# 其他指数成分股（后续扩展）
+csi_300: []
+csi_500: []
