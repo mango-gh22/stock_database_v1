@@ -1,21 +1,4 @@
-# _*_ coding: utf-8 _*_
-# File Path: E:/MyFile/stock_database_v1\main.py
-# File Name: main
-# @ File: main.py
-# @ Author: m_mango
-# @ PyCharm
-# @ Date：2025/12/4 23:36
-"""
-desc 项目入口文件
-"""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-项目主入口文件 - P1阶段版本 (v0.1.0)+P3阶段功能
-"""
-
-# main.py（简化版）
-import sys
+﻿import sys
 import os
 import argparse
 
@@ -23,53 +6,95 @@ import argparse
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
+from src.config.logging_config import setup_logging
 
-def setup_basic_logging():
-    """基本日志设置"""
-    import logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    return logging.getLogger()
-
-
-# 在 main.py 的 main() 函数中，修改 args.action 的处理
 def main():
-    logger = setup_basic_logging()
+    logger = setup_logging()
     parser = argparse.ArgumentParser(description='股票数据库系统')
-    parser.add_argument('--phase', type=str, choices=['p1', 'p2', 'p3'],
-                        default='p3', help='执行阶段')
-    parser.add_argument('--action', type=str,
-                        choices=['create_tables', 'import_a50', 'collect_daily',
-                                 'collect_latest', 'schedule', 'validate'],
-                        help='执行动作')
-
+    parser.add_argument('--phase', type=str, choices=['p1', 'p2', 'p3'], 
+                       default='p3', help='执行阶段')
+    parser.add_argument('--action', type=str, 
+                       choices=['create_tables', 'import_a50', 'collect_daily', 
+                                'collect_latest', 'test_akshare', 'validate'],
+                       help='执行动作')
+    parser.add_argument('--symbol', type=str, help='股票代码')
+    parser.add_argument('--start-date', type=str, help='开始日期 (YYYYMMDD)')
+    parser.add_argument('--end-date', type=str, help='结束日期 (YYYYMMDD)')
+    
     args = parser.parse_args()
     logger.info(f"启动股票数据库系统 - 阶段 {args.phase}")
     logger.info(f"执行动作: {args.action}")
-
+    
     if args.action == 'create_tables':
-    # ... 原有的 create_tables 代码 ...
-
-    elif args.action == 'import_a50':  # 添加这个处理
-        logger.info("开始导入中证A50成分股...")
+        from src.database.database_manager import DatabaseManager
+        db_manager = DatabaseManager()
+        
+        if db_manager.create_database_if_not_exists():
+            logger.info(" 数据库创建/确认完成")
+            if db_manager.create_all_tables():
+                logger.info(" 数据库表创建完成")
+            else:
+                logger.error(" 数据库表创建失败")
+        else:
+            logger.error(" 数据库创建失败")
+    
+    elif args.action == 'import_a50':
+        logger.info("导入中证A50成分股...")
         try:
             from src.data.import_csi_a50 import CSI_A50_Importer
             importer = CSI_A50_Importer()
             if importer.run_full_import():
-                logger.info("✅ 中证A50成分股导入完成")
+                logger.info(" 中证A50成分股导入完成")
             else:
-                logger.error("❌ 中证A50成分股导入失败")
-        except ImportError as e:
-            logger.error(f"❌ 导入模块失败: {e}")
-            logger.error("请确保 import_csi_a50.py 模块存在")
-
-    # ... 其他 action 处理 ...
-
+                logger.error(" 中证A50成分股导入失败")
+        except Exception as e:
+            logger.error(f"导入失败: {e}")
+    
+    elif args.action == 'test_akshare':
+        logger.info("测试AKShare连接...")
+        try:
+            from src.data.akshare_collector import AKShareCollector
+            collector = AKShareCollector()
+            
+            # 测试获取数据
+            test_symbol = "000001.SZ"
+            test_start = "20240101"
+            test_end = "20240110"
+            
+            df = collector.fetch_daily_data(test_symbol, test_start, test_end)
+            if df is not None and not df.empty:
+                logger.info(f" AKShare测试成功，获取到 {len(df)} 条数据")
+                logger.info(f"数据列: {list(df.columns)}")
+                logger.info(f"日期范围: {df['trade_date'].min()} 至 {df['trade_date'].max()}")
+            else:
+                logger.warning("  AKShare测试未获取到数据")
+                
+        except Exception as e:
+            logger.error(f"AKShare测试失败: {e}")
+    
+    elif args.action == 'collect_daily':
+        logger.info("采集日线数据...")
+        # 稍后实现完整的采集逻辑
+        logger.info("功能开发中...")
+    
+    elif args.action == 'validate':
+        logger.info("验证数据库状态...")
+        from src.database.db_connector import DatabaseConnector
+        db = DatabaseConnector()
+        
+        stats = db.execute_query("""
+            SELECT 
+                (SELECT COUNT(*) FROM stock_basic_info) as stocks,
+                (SELECT COUNT(*) FROM index_info) as indexes,
+                (SELECT COUNT(*) FROM stock_daily_data) as daily_data
+        """)[0]
+        
+        logger.info(f" 当前数据状态:")
+        logger.info(f"   股票基本信息: {stats['stocks']} 条")
+        logger.info(f"   指数信息: {stats['indexes']} 条")
+        logger.info(f"   日线数据: {stats['daily_data']} 条")
+    
     logger.info("程序执行完成")
-
 
 if __name__ == "__main__":
     main()
