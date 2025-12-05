@@ -1,0 +1,22 @@
+# config/data_sources.yaml
+data_sources:
+  tushare:
+    enabled: true
+    api_key: "您的tushare token"
+    endpoints:
+      daily: "/api/market/get_daily"
+      basic_info: "/api/stock/get_basic_info"
+      minute: "/api/market/get_minute"
+    rate_limit: 500  # 每分钟请求限制
+    retry_times: 3
+
+  akshare:
+    enabled: true
+    endpoints:
+      daily: "stock_zh_a_hist"
+      minute: "stock_zh_a_minute"
+
+  baostock:
+    enabled: false
+    endpoints:
+      daily: "query_history_k_data"
