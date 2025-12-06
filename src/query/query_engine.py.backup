@@ -1,0 +1,387 @@
+# _*_ coding: utf-8 _*_
+# File Path: E:/MyFile/stock_database_v1/src/query\query_engine.py
+# File Name: query_engine
+# @ Author: m_mango
+# @ Date：2025/12/6 16:26
+"""
+desc 3.1 查询引擎核心类
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+查询引擎 - v0.4.0（SQLAlchemy版本）
+作者：您的GitHub用户名
+日期：2024-12-06
+功能：股票数据查询核心引擎
+"""
+
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional, Union, Tuple
+from datetime import datetime, timedelta
+from sqlalchemy import text
+from src.database.connection import get_session, engine
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class QueryEngine:
+    """股票数据查询引擎（SQLAlchemy版本）"""
+
+    def __init__(self, config_path: str = None):
+        """
+        初始化查询引擎
+
+        Args:
+            config_path: 配置文件路径
+        """
+        self.engine = engine
+        self.logger = get_logger(__name__)
+        self._init_cache()
+
+    def _init_cache(self):
+        """初始化缓存"""
+        self._stock_cache = {}
+        self._index_cache = {}
+
+    def _execute_query(self, query: str, params: dict = None) -> pd.DataFrame:
+        """
+        执行SQL查询
+
+        Args:
+            query: SQL查询语句
+            params: 查询参数
+
+        Returns:
+            DataFrame: 查询结果
+        """
+        try:
+            if params:
+                df = pd.read_sql_query(text(query), self.engine, params=params)
+            else:
+                df = pd.read_sql_query(text(query), self.engine)
+            return df
+        except Exception as e:
+            self.logger.error(f"执行查询失败: {e}")
+            self.logger.error(f"查询语句: {query}")
+            self.logger.error(f"查询参数: {params}")
+            return pd.DataFrame()
+
+    def get_stock_basic(self,
+                       symbol: str = None,
+                       exchange: str = None,
+                       industry: str = None) -> pd.DataFrame:
+        """
+        查询股票基本信息
+
+        Args:
+            symbol: 股票代码（如：000001.SZ）
+            exchange: 交易所（SZ/SH）
+            industry: 行业分类
+
+        Returns:
+            DataFrame: 股票基本信息
+        """
+        query = """
+        SELECT 
+            symbol, name, exchange, industry, 
+            listing_date, is_active, created_at
+        FROM stock_basic
+        WHERE 1=1
+        """
+        params = {}
+
+        if symbol:
+            query += " AND symbol = :symbol"
+            params['symbol'] = symbol
+        if exchange:
+            query += " AND exchange = :exchange"
+            params['exchange'] = exchange
+        if industry:
+            query += " AND industry LIKE :industry"
+            params['industry'] = f"%{industry}%"
+
+        query += " ORDER BY symbol"
+
+        try:
+            df = self._execute_query(query, params)
+            self.logger.info(f"查询股票基本信息，返回{len(df)}条记录")
+            return df
+        except Exception as e:
+            self.logger.error(f"查询股票基本信息失败: {e}")
+            return pd.DataFrame()
+
+    def get_daily_data(self,
+                      symbol: str = None,
+                      start_date: str = None,
+                      end_date: str = None,
+                      fields: List[str] = None,
+                      limit: int = None) -> pd.DataFrame:
+        """
+        查询日线行情数据
+
+        Args:
+            symbol: 股票代码
+            start_date: 开始日期（YYYY-MM-DD）
+            end_date: 结束日期（YYYY-MM-DD）
+            fields: 返回字段列表
+            limit: 最大返回条数
+
+        Returns:
+            DataFrame: 日线行情数据
+        """
+        # 默认字段
+        if fields is None:
+            fields = ['trade_date', 'symbol', 'open', 'high', 'low',
+                     'close', 'volume', 'amount', 'change', 'pct_change']
+
+        field_str = ', '.join(fields)
+
+        query = f"""
+        SELECT {field_str}
+        FROM daily_data
+        WHERE 1=1
+        """
+        params = {}
+
+        if symbol:
+            query += " AND symbol = :symbol"
+            params['symbol'] = symbol
+        if start_date:
+            query += " AND trade_date >= :start_date"
+            params['start_date'] = start_date
+        if end_date:
+            query += " AND trade_date <= :end_date"
+            params['end_date'] = end_date
+
+        query += " ORDER BY trade_date DESC"
+
+        if limit:
+            query += f" LIMIT {limit}"
+
+        try:
+            df = self._execute_query(query, params)
+            if not df.empty:
+                if 'trade_date' in df.columns:
+                    df['trade_date'] = pd.to_datetime(df['trade_date'])
+                    df = df.sort_values('trade_date')
+            self.logger.info(f"查询日线数据，返回{len(df)}条记录")
+            return df
+        except Exception as e:
+            self.logger.error(f"查询日线数据失败: {e}")
+            return pd.DataFrame()
+
+    def get_multiple_stocks(self,
+                           symbols: List[str],
+                           start_date: str,
+                           end_date: str,
+                           fields: List[str] = None) -> Dict[str, pd.DataFrame]:
+        """
+        查询多只股票数据
+
+        Args:
+            symbols: 股票代码列表
+            start_date: 开始日期
+            end_date: 结束日期
+            fields: 返回字段列表
+
+        Returns:
+            Dict: 股票代码到DataFrame的映射
+        """
+        results = {}
+        for symbol in symbols:
+            df = self.get_daily_data(symbol, start_date, end_date, fields)
+            if not df.empty:
+                results[symbol] = df
+        return results
+
+    def get_data_statistics(self) -> Dict:
+        """
+        获取数据统计信息
+
+        Returns:
+            Dict: 数据统计信息
+        """
+        stats = {}
+
+        # 股票数量统计
+        stock_query = """
+        SELECT 
+            COUNT(*) as total_stocks,
+            COUNT(DISTINCT industry) as total_industries,
+            exchange,
+            COUNT(*) as count_by_exchange
+        FROM stock_basic
+        GROUP BY exchange
+        """
+
+        # 日线数据统计
+        daily_query = """
+        SELECT 
+            COUNT(*) as total_records,
+            MIN(trade_date) as earliest_date,
+            MAX(trade_date) as latest_date,
+            COUNT(DISTINCT symbol) as stocks_with_data
+        FROM daily_data
+        """
+
+        try:
+            # 股票统计
+            stock_stats = self._execute_query(stock_query)
+            daily_stats = self._execute_query(daily_query)
+
+            if not stock_stats.empty:
+                stats['stock_basic'] = {
+                    'total_stocks': int(stock_stats['total_stocks'].iloc[0]),
+                    'total_industries': int(stock_stats['total_industries'].iloc[0]),
+                    'exchange_distribution': stock_stats.set_index('exchange')['count_by_exchange'].to_dict()
+                }
+            else:
+                stats['stock_basic'] = {
+                    'total_stocks': 0,
+                    'total_industries': 0,
+                    'exchange_distribution': {}
+                }
+
+            if not daily_stats.empty:
+                stats['daily_data'] = {
+                    'total_records': int(daily_stats['total_records'].iloc[0]),
+                    'earliest_date': str(daily_stats['earliest_date'].iloc[0]) if pd.notna(daily_stats['earliest_date'].iloc[0]) else None,
+                    'latest_date': str(daily_stats['latest_date'].iloc[0]) if pd.notna(daily_stats['latest_date'].iloc[0]) else None,
+                    'stocks_with_data': int(daily_stats['stocks_with_data'].iloc[0])
+                }
+            else:
+                stats['daily_data'] = {
+                    'total_records': 0,
+                    'earliest_date': None,
+                    'latest_date': None,
+                    'stocks_with_data': 0
+                }
+
+            self.logger.info("数据统计查询成功")
+            return stats
+
+        except Exception as e:
+            self.logger.error(f"数据统计查询失败: {e}")
+            return {}
+
+    def get_stock_list(self) -> List[str]:
+        """
+        获取股票代码列表
+
+        Returns:
+            List: 股票代码列表
+        """
+        query = "SELECT symbol FROM stock_basic ORDER BY symbol"
+        try:
+            df = self._execute_query(query)
+            return df['symbol'].tolist()
+        except Exception as e:
+            self.logger.error(f"获取股票列表失败: {e}")
+            return []
+
+    def get_trading_dates(self,
+                         symbol: str,
+                         start_date: str = None,
+                         end_date: str = None) -> List[str]:
+        """
+        获取交易日期列表
+
+        Args:
+            symbol: 股票代码
+            start_date: 开始日期
+            end_date: 结束日期
+
+        Returns:
+            List: 交易日期列表
+        """
+        query = """
+        SELECT DISTINCT trade_date
+        FROM daily_data
+        WHERE symbol = :symbol
+        """
+        params = {'symbol': symbol}
+
+        if start_date:
+            query += " AND trade_date >= :start_date"
+            params['start_date'] = start_date
+        if end_date:
+            query += " AND trade_date <= :end_date"
+            params['end_date'] = end_date
+
+        query += " ORDER BY trade_date"
+
+        try:
+            df = self._execute_query(query, params)
+            return df['trade_date'].astype(str).tolist()
+        except Exception as e:
+            self.logger.error(f"获取交易日期失败: {e}")
+            return []
+
+    def close(self):
+        """关闭连接（SQLAlchemy自动管理）"""
+        # SQLAlchemy会自动管理连接，这里不需要手动关闭
+        pass
+
+    def test_connection(self) -> bool:
+        """测试数据库连接"""
+        try:
+            with self.engine.connect() as conn:
+                result = conn.execute(text("SELECT 1"))
+                self.logger.info("数据库连接测试成功")
+                return True
+        except Exception as e:
+            self.logger.error(f"数据库连接测试失败: {e}")
+            return False
+
+
+# ==================== 辅助函数 ====================
+
+def quick_test():
+    """快速测试函数"""
+    print("🧪 快速测试查询引擎...")
+    engine = QueryEngine()
+
+    try:
+        # 测试连接
+        if not engine.test_connection():
+            print("❌ 数据库连接失败")
+            return False
+
+        print("✅ 数据库连接成功")
+
+        # 获取统计信息
+        stats = engine.get_data_statistics()
+        print(f"📊 数据统计:")
+        print(f"  股票数量: {stats.get('stock_basic', {}).get('total_stocks', 0)}")
+        print(f"  日线记录: {stats.get('daily_data', {}).get('total_records', 0)}")
+
+        # 获取股票列表
+        stocks = engine.get_stock_list()
+        print(f"📋 股票列表 ({len(stocks)} 只):")
+        for i, stock in enumerate(stocks[:3]):
+            print(f"  {i+1}. {stock}")
+        if len(stocks) > 3:
+            print(f"  ... 等{len(stocks)}只股票")
+
+        # 测试查询数据
+        if stocks:
+            df = engine.get_daily_data(stocks[0], limit=3)
+            if not df.empty:
+                print(f"\n📅 {stocks[0]} 最近3个交易日数据:")
+                print(df[['trade_date', 'open', 'high', 'low', 'close', 'volume']].to_string())
+
+        print("\n✅ 查询引擎测试完成!")
+        return True
+
+    except Exception as e:
+        print(f"❌ 测试失败: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+if __name__ == "__main__":
+    quick_test()
