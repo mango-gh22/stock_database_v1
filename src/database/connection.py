@@ -1,69 +1,93 @@
-# _*_ coding: utf-8 _*_
-# File Path: E:/MyFile/stock_database_v1/src\connection.py
-# File Name: connection
-# @ File: connection.py
-# @ Author: m_mango
-# @ PyCharm
-# @ Date：2025/12/4 23:59
+
 """
-desc 创建数据库连接模块
+数据库连接管理 - 适配您的配置
 """
+import pymysql
 import yaml
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.ext.declarative import declarative_base
-from src.utils.logger import get_logger
+import os
 
-logger = get_logger(__name__)
-
-
-def load_database_config():
-    """加载数据库配置文件"""
+def get_connection():
+    """获取pymysql原生连接"""
     try:
-        with open('config/database.yaml', 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
-        return config['database']['mysql']
-    except FileNotFoundError:
-        logger.error("数据库配置文件 config/database.yaml 不存在")
+        # 加载配置
+        config_path = os.path.join('config', 'database.yaml')
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+
+            # 适配您的配置结构
+            mysql_config = config['database']['mysql']
+
+            print(f"连接数据库: {mysql_config['database']}@{mysql_config['host']}")
+
+            connection = pymysql.connect(
+                host=mysql_config['host'],
+                port=mysql_config['port'],
+                user=mysql_config['user'],
+                password=mysql_config['password'],
+                database=mysql_config['database'],
+                charset=mysql_config.get('charset', 'utf8mb4'),
+                cursorclass=pymysql.cursors.DictCursor
+            )
+
+            return connection
+
+        else:
+            # 如果配置文件不存在，使用默认配置
+            print("⚠️ 配置文件不存在，使用默认配置")
+            return pymysql.connect(
+                host='localhost',
+                port=3306,
+                user='root',
+                password='root1234',
+                database='stock_database',
+                charset='utf8mb4',
+                cursorclass=pymysql.cursors.DictCursor
+            )
+
+    except Exception as e:
+        print(f"连接数据库失败: {e}")
         raise
-    except KeyError:
-        logger.error("配置文件格式错误，缺少 database.mysql 配置项")
-        raise
-
-
-def create_database_engine():
-    """创建数据库引擎"""
-    config = load_database_config()
-
-    # 构建数据库连接URL
-    db_url = (
-        f"mysql+pymysql://{config['user']}:{config['password']}"
-        f"@{config['host']}:{config['port']}/{config['database']}"
-        f"?charset={config['charset']}"
-    )
-
-    logger.info(f"正在连接数据库: {config['database']}@{config['host']}")
-    engine = create_engine(db_url, pool_recycle=3600)
-    return engine
-
-
-# 全局数据库引擎和会话工厂
-engine = create_database_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_session():
-    """获取数据库会话（用于P2及以后阶段）"""
-    return SessionLocal()
-
 
 def test_connection():
-    """测试数据库连接（P1阶段用）"""
+    """测试连接"""
+    print("🧪 测试数据库连接")
+    print("-" * 40)
+
     try:
-        with engine.connect() as conn:
-            conn.execute("SELECT 1")
-        logger.info("数据库连接测试成功！")
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # 测试查询
+        cursor.execute("SELECT VERSION() as version")
+        version = cursor.fetchone()['version']
+        print(f"✅ MySQL版本: {version}")
+
+        # 显示所有表
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        table_names = [table['Tables_in_stock_database'] for table in tables]
+        print(f"📊 数据库表 ({len(table_names)}个):")
+        for table in table_names:
+            print(f"  - {table}")
+
+        cursor.close()
+        conn.close()
+
+        # 检查关键表是否存在
+        required_tables = ['stock_basic', 'stock_daily_data']
+        missing_tables = [t for t in required_tables if t not in table_names]
+
+        if missing_tables:
+            print(f"⚠️  缺少表: {missing_tables}")
+        else:
+            print("✅ 所有必需表都存在")
+
         return True
+
     except Exception as e:
-        logger.error(f"数据库连接失败: {e}")
+        print(f"❌ 连接测试失败: {e}")
         return False
+
+if __name__ == "__main__":
+    test_connection()

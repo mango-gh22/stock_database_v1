@@ -1,0 +1,109 @@
+stock_database_v1/
+├── config
+│   ├── data_sources.yaml
+│   ├── database.yaml
+│   ├── query_config.yaml
+│   ├── symbols.yaml
+│   ├── tushare_config.yaml
+│   └── tushare_token.py
+├── data
+│   ├── exports
+│   ├── processed
+│   ├── raw
+│   └── ths_export
+├── logs
+│   ├── app.log
+│   ├── stock_database_20251205.log
+│   └── stock_database_20251206.log
+├── scripts
+│   ├── schema
+│   │   └── create_tables_fixed.sql
+│   ├── setup_database.sql
+│   └── setup_mysql.py
+├── src
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── config_loader.py
+│   │   ├── logging_config.py
+│   │   └── token_loader.py
+│   ├── core
+│   ├── data
+│   │   ├── __init__.py
+│   │   ├── akshare_collector.py
+│   │   ├── akshare_collector.py.backup_nonstandard
+│   │   ├── akshare_collector_standard.py
+│   │   ├── data_collector.py
+│   │   ├── data_scheduler.py
+│   │   ├── data_storage.py
+│   │   ├── data_storage.py.backup
+│   │   └── import_csi_a50.py
+│   ├── data_sources
+│   ├── database
+│   │   ├── __init__.py
+│   │   ├── connection.py
+│   │   ├── database_manager.py
+│   │   └── db_connector.py
+│   ├── downloaders
+│   ├── processors
+│   ├── query
+│   │   ├── __init__.py
+│   │   ├── analytics.py
+│   │   ├── dynamic_query_engine.py
+│   │   ├── export.py
+│   │   ├── indicators.py
+│   │   ├── query_builder.py
+│   │   ├── query_engine.py
+│   │   ├── query_engine.py.backup
+│   │   ├── query_engine.py.backup_reserved
+│   │   ├── query_engine.py.backup_standard
+│   │   └── safe_query_engine.py
+│   ├── stock_database.egg-info
+│   │   ├── dependency_links.txt
+│   │   ├── PKG-INFO
+│   │   ├── requires.txt
+│   │   ├── SOURCES.txt
+│   │   └── top_level.txt
+│   ├── utils
+│   │   ├── code_converter.py
+│   │   └── logger.py
+│   └── __init__.py
+├── tests
+│   ├── data
+│   │   └── __init__.py
+│   ├── docs
+│   ├── integration
+│   ├── query
+│   │   ├── __init__.py
+│   │   ├── test_analytics.py
+│   │   ├── test_export.py
+│   │   ├── test_indicators.py
+│   │   └── test_query_engine.py
+│   ├── scripts
+│   ├── unit
+│   └── __init__.py
+├── .env
+├── .gitignore
+├── dynamic_query_engine.py
+├── final_p4_fix.py
+├── fix_akshare_collector.py
+├── fix_daily_query.py
+├── fix_existing_data.py
+├── fix_reserved_keywords.py
+├── fix_reserved_keywords.sql
+├── ice结构图.txt
+├── import_a50.py
+├── local_data_collector.py
+├── main.py
+├── p3_complete_test.py
+├── p4_quick_fix.py
+├── query_engine_fix.py
+├── quick_test.py
+├── README.md
+├── requirements.txt
+├── setup.py
+├── setup_database_complete.py
+├── standard_data_collector.py
+├── standardize_tables.py
+├── table_name_adapter.py
+├── test_p4_complete.py
+└── tree_全配置.py

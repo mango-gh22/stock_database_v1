@@ -1,0 +1,33 @@
+# 查询引擎配置 - v0.4.0
+query:
+  # 查询默认配置
+  defaults:
+    max_records: 10000  # 最大查询记录数
+    cache_enabled: true  # 启用缓存
+    cache_ttl: 300  # 缓存过期时间（秒）
+
+  # 技术指标配置
+  indicators:
+    # 移动平均线周期
+    ma_periods: [5, 10, 20, 60]
+    # RSI周期
+    rsi_period: 14
+    # MACD参数
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    # 布林带参数
+    bb_period: 20
+    bb_std_dev: 2.0
+
+  # 分析配置
+  analytics:
+    risk_free_rate: 0.03  # 无风险利率
+    volatility_window: 20  # 波动率计算窗口
+    correlation_window: 60  # 相关性计算窗口
+
+  # 导出配置
+  export:
+    default_format: "csv"  # 默认导出格式
+    export_dir: "data/exports"  # 导出目录
+    auto_create_dir: true  # 自动创建目录
