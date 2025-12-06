@@ -15,7 +15,7 @@ def main():
                        default='p3', help='执行阶段')
     parser.add_argument('--action', type=str, 
                        choices=['create_tables', 'import_a50', 'collect_daily', 
-                                'collect_latest', 'test_akshare', 'validate', 'p3_demo', 'collect_all'],
+                                'collect_latest', 'test_akshare', 'validate'],
                        help='执行动作')
     parser.add_argument('--symbol', type=str, help='股票代码')
     parser.add_argument('--start-date', type=str, help='开始日期 (YYYYMMDD)')
@@ -175,5 +175,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
