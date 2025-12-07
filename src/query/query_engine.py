@@ -1,3 +1,4 @@
+# src/query/query_engine.py
 
 """
 查询引擎 - 最终修复版本
@@ -127,6 +128,10 @@ class QueryEngine:
                 """
                 params = (limit,)
 
+            # df = pd.read_sql(sql, self.conn, params=params)
+            # 改为（如果需要消除警告）：
+            import warnings
+            warnings.filterwarnings('ignore', message='pandas only supports SQLAlchemy')
             df = pd.read_sql(sql, self.conn, params=params)
 
             if not df.empty:

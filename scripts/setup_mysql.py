@@ -1,13 +1,7 @@
 # _*_ coding: utf-8 _*_
 # File Path: E:/MyFile/stock_database_v1/scripts\setup_mysql.py
-# File Name: setup_mysql
-# @ File: setup_mysql.py
-# @ Author: m_mango
-# @ PyCharm
+# @ Author: mango-gh22
 # @ Date：2025/12/5 21:44
-"""
-desc 
-"""
 
 # scripts/setup_mysql.py
 import mysql.connector

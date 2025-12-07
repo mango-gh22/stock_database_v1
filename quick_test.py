@@ -24,7 +24,8 @@ if db.test_connection():
         import subprocess
         result = subprocess.run([
             'mysql', '-u', 'stock_user', '-proot1234', 'stock_database',
-            '-e', 'source scripts/schema/create_tables.sql'
+            # '-e', 'source scripts/schema/create_tables.sql'
+            '-e', 'source scripts/schema/create_tables_fixed.sql'
         ])
         print(f"✅ SQL执行结果: {result.returncode}")
 else:
