@@ -1,7 +1,0 @@
-README.md
-setup.py
-src/stock_database.egg-info/PKG-INFO
-src/stock_database.egg-info/SOURCES.txt
-src/stock_database.egg-info/dependency_links.txt
-src/stock_database.egg-info/requires.txt
-src/stock_database.egg-info/top_level.txt
