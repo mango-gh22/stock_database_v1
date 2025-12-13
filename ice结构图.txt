@@ -1,53 +1,111 @@
 stock_database_v1/
 ├── config
 │   ├── data_sources.yaml
+│   ├── datab.yaml
 │   ├── database.yaml
 │   ├── query_config.yaml
 │   ├── symbols.yaml
-│   ├── tushare_config.yaml
-│   └── tushare_token.py
+│   └── tushare_config.yaml
 ├── data
+│   ├── cache
+│   │   ├── baostock
+│   │   └── tushare
 │   ├── exports
 │   │   ├── p4_demo_export.csv
 │   │   └── p4_final_test.csv
 │   ├── processed
 │   ├── raw
+│   ├── reports
+│   │   ├── batch_update_20251207_223713.json
+│   │   ├── batch_update_20251207_223746.json
+│   │   ├── pipeline_report_20251210_201746.json
+│   │   ├── pipeline_report_20251210_202513.json
+│   │   ├── pipeline_report_20251210_202649.json
+│   │   ├── pipeline_report_20251210_204344.json
+│   │   ├── pipeline_report_20251210_205005.json
+│   │   ├── pipeline_report_20251210_205603.json
+│   │   ├── pipeline_report_20251210_210229.json
+│   │   ├── pipeline_report_20251210_212836.json
+│   │   ├── pipeline_report_20251210_215842.json
+│   │   ├── pipeline_report_20251211_061449.json
+│   │   ├── pipeline_report_20251212_211750.json
+│   │   ├── pipeline_report_20251212_213405.json
+│   │   ├── pipeline_report_20251212_213525.json
+│   │   ├── pipeline_report_20251212_213801.json
+│   │   ├── pipeline_report_20251212_223051.json
+│   │   ├── pipeline_report_20251212_224433.json
+│   │   ├── pipeline_report_20251212_224946.json
+│   │   ├── pipeline_report_20251212_225318.json
+│   │   ├── pipeline_report_20251212_231301.json
+│   │   ├── pipeline_report_20251212_231714.json
+│   │   ├── pipeline_report_20251212_233650.json
+│   │   └── pipeline_report_20251213_083349.json
 │   └── ths_export
 ├── logs
 │   ├── app.log
 │   ├── stock_database_20251205.log
-│   └── stock_database_20251206.log
+│   ├── stock_database_20251206.log
+│   ├── stock_database_20251210.log
+│   ├── stock_database_20251211.log
+│   ├── stock_database_20251212.log
+│   └── stock_database_20251213.log
 ├── scripts
 │   ├── schema
+│   │   ├── create_tables_complete.sql
 │   │   └── create_tables_fixed.sql
+│   ├── fix_column_mapping.py
+│   ├── rellback_daily_table_full.py
 │   ├── setup_database.sql
-│   └── setup_mysql.py
+│   ├── setup_mysql.py
+│   ├── update_daily_table_full.py
+│   ├── update_table_schema.py
+│   └── 文件3个说明.txt
 ├── src
 │   ├── config
 │   │   ├── __init__.py
 │   │   ├── config_loader.py
 │   │   ├── logging_config.py
+│   │   ├── secret_loader.py
 │   │   └── token_loader.py
 │   ├── core
 │   ├── data
+│   │   ├── logs
+│   │   │   └── stock_database_20251207.log
 │   │   ├── __init__.py
+│   │   ├── adaptive_storage.py
 │   │   ├── akshare_collector.py
-│   │   ├── akshare_collector.py.backup_nonstandard
-│   │   ├── akshare_collector_standard.py
+│   │   ├── baostock_collector.py
+│   │   ├── check_table_schema.py
 │   │   ├── data_collector.py
+│   │   ├── data_manager.py
+│   │   ├── data_pipeline.py
+│   │   ├── data_processor.py
 │   │   ├── data_scheduler.py
 │   │   ├── data_storage.py
 │   │   ├── data_storage.py.backup
-│   │   └── import_csi_a50.py
+│   │   ├── diagnose_storage.py
+│   │   ├── enhanced_processor.py
+│   │   ├── import_csi_a50.py
+│   │   ├── integrated_pipeline.py
+│   │   ├── integrated_pipeline_fixed.py
+│   │   ├── pipeline_fix.py
+│   │   ├── simple_storage.py
+│   │   └── tushare_collector.py
+│   ├── data_processing
+│   │   ├── __init__.py
+│   │   └── base_processor.py
 │   ├── data_sources
 │   ├── database
+│   │   ├── schema
+│   │   │   ├── __init__.py
+│   │   │   └── daily_table_schema.sql
 │   │   ├── __init__.py
 │   │   ├── connection.py
-│   │   ├── connection.py.backup
 │   │   ├── database_manager.py
 │   │   └── db_connector.py
 │   ├── downloaders
 │   ├── processors
+│   │   └── __init__.py
 │   ├── query
 │   │   ├── __init__.py
 │   │   ├── analytics.py
@@ -58,16 +116,9 @@ stock_database_v1/
 │   │   ├── query_engine.py
 │   │   ├── query_engine.py.backup
 │   │   ├── query_engine.py.backup_reserved
-│   │   ├── query_engine.py.backup_standard
-│   │   ├── simple_query.py
-│   │   └── simple_query_engine.py
-│   ├── stock_database.egg-info
-│   │   ├── dependency_links.txt
-│   │   ├── PKG-INFO
-│   │   ├── requires.txt
-│   │   ├── SOURCES.txt
-│   │   └── top_level.txt
+│   │   └── query_engine.py.backup_standard
 │   ├── utils
+│   │   ├── __init__.py
 │   │   ├── code_converter.py
 │   │   └── logger.py
 │   └── __init__.py
@@ -84,54 +135,22 @@ stock_database_v1/
 │   │   └── test_query_engine.py
 │   ├── scripts
 │   ├── unit
-│   └── __init__.py
+│   ├── __init__.py
+│   ├── demo_database_123.py
+│   ├── demo_database_mysql.py
+│   ├── demo_database_password.py
+│   └── demo_黑板.py
 ├── .env
 ├── .gitignore
-├── add_p4_commands.py
-├── analyze_main.py
-├── check_main_py.py
-├── complete_p4_safely.py
-├── create_new_main.py
-├── diagnose_structure.py
-├── dynamic_query_engine.py
-├── final_fix_p4.py
-├── final_p4_fix.py
-├── fix_akshare_collector.py
-├── fix_daily_query.py
-├── fix_database_connection.py
-├── fix_existing_data.py
-├── fix_for_your_config.py
-├── fix_import_and_config.py
-├── fix_main_py_complete.py
-├── fix_p4_problem.py
-├── fix_query_engine_final.py
-├── fix_reserved_final.sql
-├── fix_reserved_keywords.py
-├── fix_reserved_keywords.sql
-├── fix_table_names.py
 ├── ice结构图.txt
 ├── import_a50.py
 ├── local_data_collector.py
 ├── main.py
-├── main.py.backup.p4
-├── p3_complete_test.py
-├── p4_complete_test.py
-├── p4_quick_fix.py
-├── query_engine_fix.py
-├── quick_p4_test.py
 ├── quick_test.py
 ├── README.md
 ├── requirements.txt
-├── safe_query_engine.py
+├── run.py
 ├── setup.py
-├── setup_database_complete.py
-├── simple_p4_finish.py
-├── simple_p4_test.py
-├── standard_data_collector.py
-├── standardize_tables.py
 ├── table_name_adapter.py
-├── test_p4_complete.py
-├── test_p4_final.py
-├── test_safe_engine.py
-├── tree_全配置.py
-└── verify_p4_completion.py
+├── test_enhanced_storage.py
+└── tree_全配置.py

@@ -19,6 +19,12 @@ venv/
 env/
 ENV/
 
+# ------------增加项------
+.env/
+config/*.xls
+tests/demo/
+tests/demo*
+
 # 包管理
 Pipfile.lock
 poetry.lock
@@ -83,6 +89,5 @@ db.sqlite3
 ### 配置文件（含敏感信息）###[citation:7]
 # 注意：包含密码、密钥的配置文件切勿提交！
 *.local
-.env
 secrets.ini
 config_private.yaml

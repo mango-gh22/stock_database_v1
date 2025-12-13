@@ -1,228 +1,425 @@
-# src/query/query_engine.py
+# _*_ coding: utf-8 _*_
+# File Path: E:/MyFile/stock_database_v1/src/query/query_engine.py
+# @ Author: mango-gh22
+# @ Date：2025/12/5 20:20
 
 """
-查询引擎 - 最终修复版本
+查询引擎 - 适配新版数据库连接器
 """
+
 import pandas as pd
-import pymysql
-import yaml
-import os
 from datetime import datetime
+import os
+from pathlib import Path
+import logging
+
+# 使用新的数据库连接器
+from src.database.db_connector import DatabaseConnector
+
+logger = logging.getLogger(__name__)
+
 
 class QueryEngine:
-    """查询引擎 - 使用正确的cursor返回类型"""
+    """查询引擎 - 适配新版数据库连接器"""
 
-    def __init__(self):
-        """初始化"""
-        self.conn = self._get_connection()
-        print("🚀 查询引擎初始化完成")
+    def __init__(self, config_path: str = 'config/database.yaml'):
+        """
+        初始化查询引擎
 
-    def _get_connection(self):
-        """获取数据库连接"""
+        Args:
+            config_path: 配置文件路径
+        """
+        self.config_path = config_path
+        self.db_connector = DatabaseConnector(config_path)
+        logger.info("查询引擎初始化完成")
+
+    def get_data_statistics(self) -> dict:
+        """获取数据统计"""
+        stats = {
+            'total_stocks': 0,
+            'total_daily_records': 0,
+            'earliest_date': 'N/A',
+            'latest_date': 'N/A',
+            'stocks_with_data': 0,
+            'industry_count': 0,
+            'stock_list': [],
+            'stock_details': {},
+            'table_info': {}
+        }
+
         try:
-            # 读取配置
-            config_path = os.path.join('config', 'database.yaml')
-            with open(config_path, 'r', encoding='utf-8') as f:
-                config = yaml.safe_load(f)
+            # 1. 获取数据库信息
+            db_info = self.db_connector.get_database_info()
+            stats['database'] = db_info['database']
+            stats['version'] = db_info['version']
+            stats['tables'] = db_info['tables']
 
-            mysql_config = config['database']['mysql']
-
-            # 注意：这里使用普通cursor，不是DictCursor，因为我们的代码使用数字索引
-            return pymysql.connect(
-                host=mysql_config['host'],
-                port=mysql_config['port'],
-                user=mysql_config['user'],
-                password=mysql_config['password'],
-                database=mysql_config['database'],
-                charset=mysql_config.get('charset', 'utf8mb4')
-                # 移除了cursorclass=pymysql.cursors.DictCursor
+            # 2. 股票基本信息统计
+            result = self.db_connector.execute_query(
+                "SELECT COUNT(*) as count FROM stock_basic_info"
             )
+            if result:
+                stats['total_stocks'] = result[0]['count']
 
-        except Exception as e:
-            print(f"❌ 连接数据库失败: {e}")
-            raise
+            # 3. 行业统计
+            result = self.db_connector.execute_query(
+                "SELECT COUNT(DISTINCT industry) as count FROM stock_basic_info WHERE industry IS NOT NULL AND industry != ''"
+            )
+            if result:
+                stats['industry_count'] = result[0]['count']
 
-    def get_data_statistics(self):
-        """获取数据统计 - 修复fetchone()返回类型"""
-        stats = {}
-        try:
-            cursor = self.conn.cursor()
+            # 4. 股票列表
+            result = self.db_connector.execute_query(
+                "SELECT symbol, name FROM stock_basic_info ORDER BY symbol"
+            )
+            stats['stock_list'] = [row['symbol'] for row in result]
+            stats['stock_details'] = {row['symbol']: row['name'] for row in result}
 
-            # 股票基本信息统计 - 使用stock_basic_info表
-            cursor.execute("SELECT COUNT(*) FROM stock_basic_info")
-            result = cursor.fetchone()
-            stats['total_stocks'] = result[0] if result else 0
-
-            # 日线数据统计
-            cursor.execute("""
+            # 5. 日线数据统计
+            result = self.db_connector.execute_query("""
                 SELECT 
-                    COUNT(*),
-                    MIN(trade_date),
-                    MAX(trade_date),
-                    COUNT(DISTINCT symbol)
+                    COUNT(*) as total_records,
+                    MIN(trade_date) as earliest_date,
+                    MAX(trade_date) as latest_date,
+                    COUNT(DISTINCT symbol) as stocks_count
                 FROM stock_daily_data
             """)
-            result = cursor.fetchone()
-            if result:
-                stats['total_daily_records'] = result[0]
-                stats['earliest_date'] = str(result[1]) if result[1] else 'N/A'
-                stats['latest_date'] = str(result[2]) if result[2] else 'N/A'
-                stats['stocks_with_data'] = result[3]
-            else:
-                stats['total_daily_records'] = 0
-                stats['earliest_date'] = 'N/A'
-                stats['latest_date'] = 'N/A'
-                stats['stocks_with_data'] = 0
 
-            # 股票列表
-            cursor.execute("SELECT symbol, name FROM stock_basic_info ORDER BY symbol")
-            stocks = cursor.fetchall()
-            stats['stock_list'] = [stock[0] for stock in stocks]
-            stats['stock_details'] = {stock[0]: stock[1] for stock in stocks}
+            if result and result[0]:
+                row = result[0]
+                stats['total_daily_records'] = row['total_records']
+                stats['stocks_with_data'] = row['stocks_count']
 
-            # 行业统计
-            cursor.execute("SELECT COUNT(DISTINCT industry) FROM stock_basic_info")
-            result = cursor.fetchone()
-            stats['industry_count'] = result[0] if result else 0
+                if row['earliest_date']:
+                    stats['earliest_date'] = row['earliest_date'].strftime('%Y-%m-%d')
+                if row['latest_date']:
+                    stats['latest_date'] = row['latest_date'].strftime('%Y-%m-%d')
 
-            cursor.close()
+            # 6. 表信息统计
+            table_counts = {}
+            for table in db_info['tables']:
+                try:
+                    result = self.db_connector.execute_query(f"SELECT COUNT(*) as count FROM {table}")
+                    if result:
+                        table_counts[table] = result[0]['count']
+                except:
+                    table_counts[table] = 0
 
-            print(f"📊 数据统计完成: {stats.get('total_daily_records', 0)}条日线记录")
+            stats['table_counts'] = table_counts
+
+            logger.info(f"数据统计完成: {stats['total_daily_records']}条日线记录")
             return stats
 
         except Exception as e:
-            print(f"❌ 获取统计失败: {e}")
-            import traceback
-            traceback.print_exc()
-            return {}
+            logger.error(f"获取统计失败: {e}")
+            return stats
 
-    def query_daily_data(self, symbol=None, limit=10):
-        """查询日线数据"""
+    def query_daily_data(self, symbol: str = None, start_date: str = None,
+                         end_date: str = None, limit: int = 100) -> pd.DataFrame:
+        """
+        查询日线数据
+
+        Args:
+            symbol: 股票代码
+            start_date: 开始日期 YYYY-MM-DD
+            end_date: 结束日期 YYYY-MM-DD
+            limit: 限制返回条数
+
+        Returns:
+            日线数据DataFrame
+        """
         try:
-            if symbol:
-                # 注意：这里使用change_amount而不是change
-                sql = """
-                    SELECT 
-                        trade_date, symbol,
-                        `open`, `high`, `low`, `close`,
-                        volume, amount, pct_change,
-                        change_amount as price_change,
-                        pre_close, turnover_rate, amplitude
-                    FROM stock_daily_data
-                    WHERE symbol = %s
-                    ORDER BY trade_date DESC
-                    LIMIT %s
-                """
-                params = (symbol, limit)
-            else:
-                sql = """
-                    SELECT 
-                        trade_date, symbol,
-                        `open`, `high`, `low`, `close`,
-                        volume, amount, pct_change,
-                        change_amount as price_change,
-                        pre_close, turnover_rate, amplitude
-                    FROM stock_daily_data
-                    ORDER BY trade_date DESC
-                    LIMIT %s
-                """
-                params = (limit,)
+            # 构建查询
+            where_conditions = []
+            params = []
 
-            # df = pd.read_sql(sql, self.conn, params=params)
-            # 改为（如果需要消除警告）：
-            import warnings
-            warnings.filterwarnings('ignore', message='pandas only supports SQLAlchemy')
-            df = pd.read_sql(sql, self.conn, params=params)
+            if symbol:
+                where_conditions.append("symbol = %s")
+                params.append(symbol)
+
+            if start_date:
+                where_conditions.append("trade_date >= %s")
+                params.append(start_date)
+
+            if end_date:
+                where_conditions.append("trade_date <= %s")
+                params.append(end_date)
+
+            where_clause = ""
+            if where_conditions:
+                where_clause = "WHERE " + " AND ".join(where_conditions)
+
+            # 构建查询语句 - 适配您的表结构
+            query = f"""
+                SELECT 
+                    trade_date, 
+                    symbol,
+                    open_price as open,
+                    high_price as high,
+                    low_price as low,
+                    close_price as close,
+                    volume,
+                    amount,
+                    pct_change,
+                    change_amount as price_change,
+                    pre_close_price as pre_close,
+                    turnover_rate,
+                    amplitude,
+                    ma5, ma10, ma20
+                FROM stock_daily_data
+                {where_clause}
+                ORDER BY trade_date DESC
+                LIMIT %s
+            """
+            params.append(limit)
+
+            # 执行查询
+            result = self.db_connector.execute_query(query, tuple(params))
+
+            # 转换为DataFrame
+            df = pd.DataFrame(result) if result else pd.DataFrame()
 
             if not df.empty:
-                # 转换数据类型
+                # 转换日期类型
                 if 'trade_date' in df.columns:
                     df['trade_date'] = pd.to_datetime(df['trade_date'])
 
-                # 转换数值列
-                numeric_cols = ['open', 'high', 'low', 'close', 'volume', 'amount', 
-                              'pct_change', 'price_change', 'pre_close', 
-                              'turnover_rate', 'amplitude']
+                # 转换数值类型
+                numeric_cols = ['open', 'high', 'low', 'close', 'volume', 'amount',
+                                'pct_change', 'price_change', 'pre_close',
+                                'turnover_rate', 'amplitude', 'ma5', 'ma10', 'ma20']
+
                 for col in numeric_cols:
                     if col in df.columns:
                         df[col] = pd.to_numeric(df[col], errors='coerce')
 
-            print(f"✅ 查询成功: {len(df)}条记录")
+            logger.info(f"查询日线数据成功: {len(df)}条记录")
             return df
 
         except Exception as e:
-            print(f"❌ 查询失败: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"查询日线数据失败: {e}")
             return pd.DataFrame()
 
-    def get_stock_list(self):
-        """获取股票列表 - 新增方法"""
-        try:
-            sql = "SELECT symbol, name FROM stock_basic_info ORDER BY symbol"
-            df = pd.read_sql(sql, self.conn)
-            print(f"📋 获取股票列表: {len(df)}只股票")
-            return df
-        except Exception as e:
-            print(f"❌ 获取股票列表失败: {e}")
-            return pd.DataFrame()
+    def query_stock_basic(self, symbol: str = None, industry: str = None) -> pd.DataFrame:
+        """
+        查询股票基本信息
 
-    def query_stock_basic(self, symbol=None):
-        """查询股票基本信息"""
+        Args:
+            symbol: 股票代码
+            industry: 行业
+
+        Returns:
+            股票基本信息DataFrame
+        """
         try:
+            where_conditions = []
+            params = []
+
             if symbol:
-                sql = "SELECT symbol, name, industry FROM stock_basic_info WHERE symbol = %s"
-                params = (symbol,)
-            else:
-                sql = "SELECT symbol, name, industry FROM stock_basic_info ORDER BY symbol"
-                params = None
+                where_conditions.append("symbol = %s")
+                params.append(symbol)
 
-            df = pd.read_sql(sql, self.conn, params=params)
-            print(f"✅ 查询股票信息: {len(df)}条记录")
+            if industry:
+                where_conditions.append("industry LIKE %s")
+                params.append(f"%{industry}%")
+
+            where_clause = ""
+            if where_conditions:
+                where_clause = "WHERE " + " AND ".join(where_conditions)
+
+            query = f"""
+                SELECT 
+                    symbol,
+                    name,
+                    industry,
+                    area,
+                    market,
+                    list_date,
+                    exchange,
+                    list_status
+                FROM stock_basic_info
+                {where_clause}
+                ORDER BY symbol
+            """
+
+            result = self.db_connector.execute_query(query, tuple(params) if params else None)
+            df = pd.DataFrame(result) if result else pd.DataFrame()
+
+            logger.info(f"查询股票基本信息成功: {len(df)}条记录")
             return df
 
         except Exception as e:
-            print(f"❌ 查询股票信息失败: {e}")
+            logger.error(f"查询股票基本信息失败: {e}")
             return pd.DataFrame()
 
-    def export_to_csv(self, symbol=None, filename=None):
-        """导出数据到CSV"""
+    def get_stock_list(self, market: str = None) -> pd.DataFrame:
+        """
+        获取股票列表
+
+        Args:
+            market: 市场类型
+
+        Returns:
+            股票列表DataFrame
+        """
+        try:
+            where_conditions = []
+            params = []
+
+            if market:
+                if market.upper() == 'SH':
+                    where_conditions.append("exchange = 'SH'")
+                elif market.upper() == 'SZ':
+                    where_conditions.append("exchange = 'SZ'")
+                elif market.upper() == 'BJ':
+                    where_conditions.append("exchange = 'BJ'")
+
+            where_clause = ""
+            if where_conditions:
+                where_clause = "WHERE " + " AND ".join(where_conditions)
+
+            query = f"""
+                SELECT 
+                    symbol,
+                    name,
+                    industry,
+                    market,
+                    exchange
+                FROM stock_basic_info
+                {where_clause}
+                ORDER BY symbol
+            """
+
+            result = self.db_connector.execute_query(query, tuple(params) if params else None)
+            df = pd.DataFrame(result) if result else pd.DataFrame()
+
+            logger.info(f"获取股票列表成功: {len(df)}只股票")
+            return df
+
+        except Exception as e:
+            logger.error(f"获取股票列表失败: {e}")
+            return pd.DataFrame()
+
+    def export_to_csv(self, symbol: str = None, start_date: str = None,
+                      end_date: str = None, filename: str = None) -> str:
+        """
+        导出数据到CSV
+
+        Args:
+            symbol: 股票代码
+            start_date: 开始日期
+            end_date: 结束日期
+            filename: 文件名
+
+        Returns:
+            导出文件路径
+        """
         try:
             # 查询数据
-            df = self.query_daily_data(symbol=symbol, limit=1000)
+            df = self.query_daily_data(symbol, start_date, end_date, limit=5000)
 
             if df.empty:
-                print("⚠️  无数据可导出")
+                logger.warning("无数据可导出")
                 return "无数据可导出"
 
             # 生成文件名
             if filename is None:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 symbol_part = f"_{symbol}" if symbol else "_all"
-                filename = f"stock_data{symbol_part}_{timestamp}.csv"
+                date_part = ""
+                if start_date and end_date:
+                    date_part = f"_{start_date}_{end_date}"
+                elif start_date:
+                    date_part = f"_{start_date}"
+                filename = f"stock_data{symbol_part}{date_part}_{timestamp}.csv"
 
             # 确保导出目录存在
-            export_dir = "data/exports"
-            os.makedirs(export_dir, exist_ok=True)
+            export_dir = Path("data/exports")
+            export_dir.mkdir(parents=True, exist_ok=True)
 
-            filepath = os.path.join(export_dir, filename)
+            filepath = export_dir / filename
+
+            # 导出到CSV
             df.to_csv(filepath, index=False, encoding='utf-8-sig')
 
-            print(f"💾 导出成功: {filepath} ({len(df)}条记录)")
-            return filepath
+            logger.info(f"导出成功: {filepath} ({len(df)}条记录)")
+            return str(filepath)
 
         except Exception as e:
-            print(f"❌ 导出失败: {e}")
+            logger.error(f"导出失败: {e}")
             return str(e)
+
+    def execute_custom_query(self, query: str, params: tuple = None) -> pd.DataFrame:
+        """
+        执行自定义查询
+
+        Args:
+            query: SQL查询语句
+            params: 查询参数
+
+        Returns:
+            查询结果DataFrame
+        """
+        try:
+            result = self.db_connector.execute_query(query, params)
+            df = pd.DataFrame(result) if result else pd.DataFrame()
+
+            logger.info(f"执行自定义查询成功: {len(df)}条记录")
+            return df
+
+        except Exception as e:
+            logger.error(f"执行自定义查询失败: {e}")
+            return pd.DataFrame()
+
+    def get_table_schema(self, table_name: str) -> pd.DataFrame:
+        """
+        获取表结构信息
+
+        Args:
+            table_name: 表名
+
+        Returns:
+            表结构信息
+        """
+        try:
+            query = f"""
+                SELECT 
+                    COLUMN_NAME,
+                    DATA_TYPE,
+                    IS_NULLABLE,
+                    COLUMN_DEFAULT,
+                    COLUMN_COMMENT
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = %s
+                ORDER BY ORDINAL_POSITION
+            """
+
+            result = self.db_connector.execute_query(query, (table_name,))
+            df = pd.DataFrame(result) if result else pd.DataFrame()
+
+            logger.info(f"获取表结构成功: {table_name}")
+            return df
+
+        except Exception as e:
+            logger.error(f"获取表结构失败: {e}")
+            return pd.DataFrame()
 
     def close(self):
         """关闭连接"""
-        if self.conn:
-            self.conn.close()
-            print("🔌 数据库连接已关闭")
+        self.db_connector.close_all_connections()
+        logger.info("数据库连接已关闭")
+
 
 def test_query_engine():
     """测试查询引擎"""
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
     print("🧪 测试查询引擎")
     print("=" * 50)
 
@@ -234,16 +431,28 @@ def test_query_engine():
         stats = engine.get_data_statistics()
 
         if stats:
+            print(f"   数据库: {stats.get('database', 'Unknown')}")
+            print(f"   版本: {stats.get('version', 'Unknown')}")
             print(f"   股票总数: {stats.get('total_stocks', 0)}")
             print(f"   日线记录: {stats.get('total_daily_records', 0)}")
             print(f"   数据范围: {stats.get('earliest_date', 'N/A')} 到 {stats.get('latest_date', 'N/A')}")
+            print(f"   行业数量: {stats.get('industry_count', 0)}")
 
-        # 2. 查询测试
-        print("\n📈 2. 查询功能测试")
-        if stats and stats.get('stock_list'):
-            test_symbol = stats['stock_list'][0]
-            stock_name = stats['stock_details'].get(test_symbol, '未知')
-            print(f"   测试股票: {test_symbol} ({stock_name})")
+        # 2. 获取股票列表
+        print("\n📋 2. 获取股票列表")
+        stock_df = engine.get_stock_list()
+        if not stock_df.empty:
+            print(f"   获取到 {len(stock_df)} 只股票")
+            print("   前5只股票:")
+            for i, (_, row) in enumerate(stock_df.head().iterrows()):
+                print(f"     {i + 1}. {row['symbol']} - {row['name']} ({row.get('industry', 'N/A')})")
+
+        # 3. 查询具体股票数据
+        print("\n📈 3. 查询股票数据")
+        if not stock_df.empty:
+            test_symbol = stock_df.iloc[0]['symbol']
+            test_name = stock_df.iloc[0]['name']
+            print(f"   测试股票: {test_symbol} ({test_name})")
 
             data = engine.query_daily_data(symbol=test_symbol, limit=3)
             if not data.empty:
@@ -252,18 +461,30 @@ def test_query_engine():
                     date_str = str(row['trade_date'])[:10] if 'trade_date' in row else '未知日期'
                     close_price = row.get('close', 'N/A')
                     price_change = row.get('price_change', 0)
-                    print(f"     {date_str}: 收盘价 {close_price} 涨跌 {price_change:+.2f}")
+                    pct_change = row.get('pct_change', 0)
+                    print(f"     {date_str}: 收盘价 {close_price} 涨跌 {price_change:+.2f} ({pct_change:+.2f}%)")
             else:
                 print("   未查询到数据")
         else:
             print("   无股票数据")
 
-        # 3. 导出测试
-        print("\n💾 3. 数据导出测试")
-        if stats and stats.get('stock_list'):
+        # 4. 表结构查看
+        print("\n🏗️  4. 表结构查看")
+        table_schema = engine.get_table_schema('stock_daily_data')
+        if not table_schema.empty:
+            print(f"   stock_daily_data 表结构 ({len(table_schema)}列):")
+            for i, (_, row) in enumerate(table_schema.head(5).iterrows()):
+                print(
+                    f"     {row['COLUMN_NAME']}: {row['DATA_TYPE']} {'NULL' if row['IS_NULLABLE'] == 'YES' else 'NOT NULL'}")
+            if len(table_schema) > 5:
+                print(f"     ... 还有 {len(table_schema) - 5} 列")
+
+        # 5. 导出测试
+        print("\n💾 5. 数据导出测试")
+        if not stock_df.empty:
             export_file = engine.export_to_csv(
-                symbol=stats['stock_list'][0],
-                filename="p4_final_test.csv"
+                symbol=stock_df.iloc[0]['symbol'],
+                filename="test_export.csv"
             )
             print(f"   导出结果: {export_file}")
 
@@ -276,6 +497,7 @@ def test_query_engine():
 
     finally:
         engine.close()
+
 
 if __name__ == "__main__":
     test_query_engine()

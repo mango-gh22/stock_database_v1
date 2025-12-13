@@ -14,6 +14,7 @@ import os
 import yaml
 from dotenv import load_dotenv
 from pathlib import Path
+from typing import List, Dict, Any, Optional, Tuple, Union
 
 
 def load_tushare_config():
@@ -41,6 +42,81 @@ def load_tushare_config():
     config = yaml.safe_load(content)
     return config.get('tushare', {})
 
+
+# 在 config_loader.py 中添加以下函数
+def load_database_config(config_path: Optional[str] = None) -> Dict:
+    """
+    加载数据库配置
+
+    Args:
+        config_path: 配置文件路径，默认使用 config/database.yaml
+
+    Returns:
+        数据库配置字典
+    """
+    if config_path is None:
+        config_path = Path(__file__).parent.parent.parent / 'config' / 'database.yaml'
+
+    config_path = Path(config_path)
+
+    if not config_path.exists():
+        logger.warning(f"数据库配置文件不存在: {config_path}")
+        return _get_default_database_config()
+
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config_data = yaml.safe_load(f)
+
+        # 支持两种格式：嵌套和扁平
+        if 'database' in config_data:
+            # 嵌套格式
+            db_config = config_data['database']
+        else:
+            # 扁平格式
+            db_config = config_data
+
+        # 替换环境变量
+        db_config = _replace_env_variables(db_config)
+
+        logger.info(f"从配置文件加载数据库配置: {config_path}")
+        return db_config
+
+    except Exception as e:
+        logger.error(f"加载数据库配置失败: {e}")
+        return _get_default_database_config()
+
+
+def _get_default_database_config() -> Dict:
+    """获取默认数据库配置"""
+    return {
+        'host': 'localhost',
+        'port': 3306,
+        'user': 'root',
+        'password': '',
+        'database': 'stock_database',
+        'charset': 'utf8mb4',
+        'pool_size': 5,
+        'pool_name': 'stock_pool',
+        'autocommit': True
+    }
+
+
+def _replace_env_variables(config_dict: Dict) -> Dict:
+    """替换配置中的环境变量占位符"""
+    if not config_dict:
+        return config_dict
+
+    result = {}
+    for key, value in config_dict.items():
+        if isinstance(value, str) and value.startswith('${') and value.endswith('}'):
+            env_var = value[2:-1]
+            result[key] = os.environ.get(env_var, '')
+        elif isinstance(value, dict):
+            result[key] = _replace_env_variables(value)
+        else:
+            result[key] = value
+
+    return result
 
 # 使用示例
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 data_sources:
   tushare:
     enabled: true
-    api_key: "您的tushare token"
+    api_key: "您的tushare token"  # 可以从系统变量TUSHARE_TOKEN 或 .env中同名获取
     endpoints:
       daily: "/api/market/get_daily"
       basic_info: "/api/stock/get_basic_info"
