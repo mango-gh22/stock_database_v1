@@ -26,11 +26,8 @@ from src.config.config_loader import load_tushare_config
 
 # 配置日志
 logger = logging.getLogger(__name__)
-
-
 class BaseDataProcessor:
     """基础数据处理类 - 集成到现有架构"""
-
     def __init__(self, config_path: str = 'config/database.yaml'):
         """
         初始化数据处理器
@@ -852,7 +849,6 @@ def main():
                 print(f"检查数据质量失败 {code}: {e}")
 
     print("\n数据处理模块初始化完成！")
-
 
 if __name__ == "__main__":
     main()
