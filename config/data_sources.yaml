@@ -20,3 +20,14 @@ data_sources:
     enabled: false
     endpoints:
       daily: "query_history_k_data"
+
+
+adjustment_factors:
+  baostock:
+    enabled: true
+    endpoint: "query_dividend_data"
+    fields: [ "symbol", "dividPreNoticeDate", "dividAgmPumDate", "dividCashPsBeforeTax" ]
+  tushare:
+    enabled: true
+    endpoint: "dividend"
+    fields: [ "ts_code", "ann_date", "ex_date", "cash_div" ]

@@ -152,5 +152,23 @@ CREATE TABLE IF NOT EXISTS stock_financial_indicators (
     INDEX idx_symbol (symbol)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 在现有表后添加：
+CREATE TABLE IF NOT EXISTS adjust_factors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    symbol VARCHAR(20) NOT NULL,
+    ex_date DATE NOT NULL COMMENT '除权除息日',
+    cash_div DECIMAL(10, 4) COMMENT '现金分红(每股)',
+    shares_div DECIMAL(10, 4) COMMENT '送股比例',
+    allotment_ratio DECIMAL(10, 4) COMMENT '配股比例',
+    allotment_price DECIMAL(10, 4) COMMENT '配股价',
+    split_ratio DECIMAL(10, 4) COMMENT '拆股比例',
+    forward_factor DECIMAL(12, 6) COMMENT '前复权因子',
+    backward_factor DECIMAL(12, 6) COMMENT '后复权因子',
+    total_factor DECIMAL(12, 6) COMMENT '累计复权因子',
+    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_symbol_ex_date (symbol, ex_date)
+);
+
+
 -- 显示所有表
 SELECT 'Tables created successfully!' as message;
