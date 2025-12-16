@@ -5,6 +5,7 @@
 # @ Date：2025/12/14 15:36
 """
 desc 复权计算模块 - 实现前复权、后复权价格计算
+修复版本: v0.5.1-fix - 修正数据库连接器初始化顺序
 """
 
 import pandas as pd
@@ -13,7 +14,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Union
 import logging
 from decimal import Decimal, ROUND_HALF_UP
-from enum import Enum  # 添加这行
+from enum import Enum
 
 from src.query.query_engine import QueryEngine
 from src.database.db_connector import DatabaseConnector
@@ -24,27 +25,30 @@ except ImportError:
     # 如果文件不存在，在 adjustor.py 内创建简化版
     class AdjustmentFactorManager:
         """简化的复权因子管理器"""
+
         def __init__(self, config_path: str):
             pass
+
         def fetch_factors_from_baostock(self, symbol: str, **kwargs):
             return pd.DataFrame()
+
         def save_factors_to_db(self, factors_df):
             return True
 
-
-
 logger = logging.getLogger(__name__)
+
 
 class AdjustType(Enum):
     """复权类型枚举"""
-    NONE = "none"          # 不复权
-    FORWARD = "forward"    # 前复权
+    NONE = "none"  # 不复权
+    FORWARD = "forward"  # 前复权
     BACKWARD = "backward"  # 后复权
+
 
 class AdjustMethod(Enum):
     """复权计算方法枚举"""
-    FACTOR = "factor"      # 因子法
-    PRICE = "price"        # 价格法
+    FACTOR = "factor"  # 因子法
+    PRICE = "price"  # 价格法
 
 
 class DividendEvent:
@@ -112,40 +116,80 @@ class DividendEvent:
 
 
 class StockAdjustor:
-    """股票复权计算器"""
+    """股票复权计算器 - 修复版"""
 
     def __init__(self, config_path: str = 'config/database.yaml'):
         """
-        初始化复权计算器
+        初始化复权计算器 - 修复初始化顺序
 
         Args:
             config_path: 数据库配置文件路径
         """
-
         self.config_path = config_path
-        self._create_adjustment_table()
-        self.adjustment_manager = AdjustmentFactorManager(config_path)
-
-        self.query_engine = QueryEngine(config_path)
-        self.db_connector = DatabaseConnector(config_path)
         self.factor_cache = {}  # 缓存复权因子
-        logger.info("股票复权计算器初始化完成")
+
+        # 修复：先初始化数据库连接器
+        try:
+            self.db_connector = DatabaseConnector(config_path)
+            logger.info("数据库连接器初始化成功")
+        except Exception as e:
+            logger.error(f"数据库连接器初始化失败: {e}")
+            self.db_connector = None
+
+        # 修复：然后创建表（如果连接器存在）
+        if self.db_connector:
+            try:
+                self._create_adjustment_table()
+            except Exception as e:
+                logger.error(f"创建复权因子表失败: {e}")
+
+        # 初始化其他组件
+        try:
+            self.query_engine = QueryEngine(config_path)
+            self.adjustment_manager = AdjustmentFactorManager(config_path)
+            logger.info("股票复权计算器初始化完成")
+        except Exception as e:
+            logger.error(f"复权计算器初始化失败: {e}")
+            self.query_engine = None
+            self.adjustment_manager = None
 
     def _create_adjustment_table(self):
-        """创建复权因子表"""
-        sql = """
-        CREATE TABLE IF NOT EXISTS adjust_factors (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            symbol VARCHAR(20) NOT NULL,
-            ex_date DATE NOT NULL,
-            cash_div DECIMAL(10, 4),
-            forward_factor DECIMAL(12, 6),
-            backward_factor DECIMAL(12, 6),
-            UNIQUE KEY uk_symbol_ex_date (symbol, ex_date)
-        )
-        """
-        self.db_connector.execute_query(sql)
+        """创建复权因子表 - 修复版"""
+        if not self.db_connector:
+            logger.error("数据库连接器不可用，无法创建表")
+            return
 
+        try:
+            # 检查表是否已存在
+            check_sql = "SHOW TABLES LIKE 'adjust_factors'"
+            result = self.db_connector.execute_query(check_sql)
+
+            if result:
+                logger.info("复权因子表已存在")
+                return
+
+            sql = """
+            CREATE TABLE IF NOT EXISTS adjust_factors (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                symbol VARCHAR(20) NOT NULL,
+                ex_date DATE NOT NULL,
+                cash_div DECIMAL(10, 4),
+                shares_div DECIMAL(10, 4),
+                allotment_ratio DECIMAL(10, 4),
+                allotment_price DECIMAL(10, 4),
+                split_ratio DECIMAL(10, 4),
+                forward_factor DECIMAL(12, 6),
+                backward_factor DECIMAL(12, 6),
+                total_factor DECIMAL(12, 6),
+                created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_symbol_ex_date (symbol, ex_date)
+            )
+            """
+            self.db_connector.execute_query(sql)
+            logger.info("复权因子表创建成功")
+
+        except Exception as e:
+            logger.error(f"创建复权因子表失败: {e}")
 
     def load_dividend_events(self, symbol: str) -> List[DividendEvent]:
         """
@@ -597,8 +641,9 @@ class StockAdjustor:
 
     def close(self):
         """关闭连接"""
-        self.db_connector.close_all_connections()
-        logger.info("复权计算器连接已关闭")
+        if self.db_connector:
+            self.db_connector.close_all_connections()
+            logger.info("复权计算器连接已关闭")
 
 
 def test_adjustor():
