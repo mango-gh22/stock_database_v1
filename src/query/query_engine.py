@@ -18,7 +18,6 @@ from src.database.db_connector import DatabaseConnector
 
 logger = logging.getLogger(__name__)
 
-
 class QueryEngine:
     """查询引擎 - 适配新版数据库连接器"""
 
@@ -160,8 +159,9 @@ class QueryEngine:
                     close_price as close,
                     volume,
                     amount,
-                    pct_change,
-                    change_amount as price_change,
+                    change_percent as pct_change,
+                    change_percent as price_change,
+#                     change_amount as price_change,
                     pre_close_price as pre_close,
                     turnover_rate,
                     amplitude,
@@ -182,7 +182,8 @@ class QueryEngine:
             if not df.empty:
                 # 转换日期类型
                 if 'trade_date' in df.columns:
-                    df['trade_date'] = pd.to_datetime(df['trade_date'])
+                    # df['trade_date'] = pd.to_datetime(df['trade_date'])
+                    df['trade_date'] = pd.to_datetime(df['trade_date']).dt.strftime('%Y-%m-%d')
 
                 # 转换数值类型
                 numeric_cols = ['open', 'high', 'low', 'close', 'volume', 'amount',
