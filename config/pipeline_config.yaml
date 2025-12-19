@@ -1,0 +1,78 @@
+# config/pipeline_config.yaml
+pipeline_modes:
+  incremental:
+    enabled: true
+    schedule: "0 16 * * *"  # 每日16:00执行
+    default_days_back: 30
+    max_concurrent: 3
+    quality_threshold: 50
+    symbols_source: "database"
+    retry_times: 3
+    retry_delay: 1
+    data_sources: ["baostock"]
+
+  batch_init:
+    enabled: true
+    schedule: "0 2 * * 6"   # 每周六凌晨2点
+    default_start_date: "20200101"
+    max_concurrent: 5
+    batch_size: 50
+    force_update: false
+    default_groups: ["csi_a50"]
+
+  specific:
+    enabled: true
+    max_concurrent: 2
+    default_adjust: "qfq"
+    skip_existing: true
+    priority_levels:
+      high: 1
+      medium: 3
+      low: 5
+
+performance:
+  max_workers: 5
+  request_delay: 0.5
+  timeout: 30
+  batch_timeout: 300
+
+monitoring:
+  enable_progress: true
+  enable_reports: true
+  report_dir: "data/reports"
+  log_level: "INFO"
+  email_notification: false
+  webhook_notification: false
+
+symbol_groups:
+  csi_a50:
+    name: "中证A50指数"
+    description: "核心蓝筹股"
+    symbols_source: "config/symbols.yaml"
+    update_frequency: "daily"
+    priority: "high"
+
+  csi_300:
+    name: "沪深300指数"
+    description: "全市场代表性股票"
+    symbols_source: "database"
+    criteria: "list_status='L' AND market_cap>100e8"
+    update_frequency: "daily"
+    priority: "medium"
+
+  csi_500:
+    name: "中证500指数"
+    description: "中小盘股票"
+    symbols_source: "database"
+    criteria: "list_status='L'"
+    update_frequency: "weekly"
+    priority: "medium"
+
+advanced:
+  enable_cache: true
+  cache_ttl: 3600  # 1小时
+  enable_validation: true
+  enable_retry: true
+  max_retry_attempts: 3
+  enable_fallback: true
+  fallback_sources: ["tushare", "akshare"]

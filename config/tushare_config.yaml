@@ -1,0 +1,158 @@
+# config/tushare_config.yaml
+# 这是Tushare API的配置文件
+# 注意：真正的Token应存储在.env文件或系统环境变量中
+
+# Tushare Pro API配置 - 完整版
+
+tushare:
+  # API配置
+  api:
+    token: "${TUSHARE_TOKEN}"  # 必须设置的环境变量
+    base_url: "https://api.tushare.pro"
+    version: "v1"  # API版本
+    timeout: 30  # 超时时间(秒)
+    max_retries: 3  # 最大重试次数
+    retry_delay: 2  # 重试延迟(秒)
+
+  # 速率限制
+  rate_limits:
+    daily_limit: 5000  # 每日调用限制
+    minute_limit: 500  # 每分钟调用限制
+    concurrent_limit: 10  # 并发限制
+    burst_limit: 50  # 突发限制
+
+  # 数据源优先级
+  data_sources:
+    primary: "tushare"
+    fallback: "akshare"
+    backup: "baostock"
+
+  # 缓存配置
+  cache:
+    enabled: true
+    ttl_minutes: 60  # 缓存有效期(分钟)
+    memory_cache_size: 100  # 内存缓存大小(MB)
+    disk_cache_path: "./data/cache/tushare"
+    compression: true  # 是否压缩缓存
+
+  # 重试策略
+  retry_strategy:
+    max_attempts: 3
+    backoff_factor: 1.5
+    retry_on_status: [429, 500, 502, 503, 504]
+
+  # 数据完整性检查
+  validation:
+    enabled: true
+    check_missing_dates: true
+    validate_price_range: true
+    check_volume_consistency: true
+    min_data_quality: 80  # 最低数据质量评分
+
+  # 批量处理配置
+  batch_processing:
+    max_batch_size: 500  # 最大批量大小
+    batch_delay_ms: 100  # 批次间延迟(毫秒)
+    parallel_workers: 5  # 并行工作线程数
+    chunk_size: 50  # 分块大小
+
+  # API端点映射
+  endpoints:
+    # 股票相关
+    daily: "daily"
+    weekly: "weekly"
+    monthly: "monthly"
+    adj_factor: "adj_factor"
+    suspend_d: "suspend_d"
+
+    # 基本信息
+    stock_basic: "stock_basic"
+    trade_cal: "trade_cal"
+    hs_const: "hs_const"
+
+    # 财务数据
+    income: "income"
+    balancesheet: "balancesheet"
+    cashflow: "cashflow"
+    forecast: "forecast"
+
+    # 分钟数据
+    stk_mins: "stk_mins"
+    us_mins: "us_mins"
+    hk_mins: "hk_mins"
+
+    # 指数数据
+    index_basic: "index_basic"
+    index_daily: "index_daily"
+    index_weight: "index_weight"
+
+  # 数据字段映射配置
+  field_mappings:
+    daily:
+      ts_code: "symbol"
+      trade_date: "trade_date"
+      open: "open_price"
+      close: "close_price"
+      high: "high_price"
+      low: "low_price"
+      pre_close: "pre_close_price"
+      change: "change_amount"
+      pct_chg: "pct_change"
+      vol: "volume"
+      amount: "amount"
+
+    stock_basic:
+      ts_code: "ts_code"
+      symbol: "symbol"
+      name: "name"
+      area: "area"
+      industry: "industry"
+      market: "market"
+      list_date: "list_date"
+
+  # 日志配置
+  logging:
+    level: "INFO"  # DEBUG/INFO/WARNING/ERROR
+    log_requests: true
+    log_responses: false
+    log_file: "./logs/tushare_api.log"
+    max_log_size: "10MB"
+    backup_count: 5
+
+  # 监控配置
+  monitoring:
+    enabled: true
+    metrics_port: 9090
+    alert_thresholds:
+      error_rate: 5  # 错误率阈值(%)
+      avg_response_time: 2000  # 平均响应时间阈值(毫秒)
+      daily_limit_usage: 80  # 日限制使用率阈值(%)
+
+  # 高级配置
+  advanced:
+    use_proxy: false
+    proxy_url: ""
+    verify_ssl: true
+    user_agent: "StockDatabase/1.0"
+    connection_pool_size: 10
+
+# 系统配置
+system:
+  environment: "${ENVIRONMENT:development}"  # development/testing/production
+  version: "1.0.0"
+  author: "mango-gh22"
+  last_updated: "2025-12-05"
+
+# 提醒配置
+reminders:
+  - "请确保在.env文件中设置TUSHARE_TOKEN"
+  - "生产环境请使用不同的数据库配置"
+  - "定期备份数据库和数据文件"
+  - "监控API调用量和数据质量"
+
+# 文档链接
+documentation:
+  tushare_official: "https://tushare.pro/document/2"
+  api_reference: "https://tushare.pro/document/1"
+  rate_limit_info: "https://tushare.pro/document/1?doc_id=108"
+

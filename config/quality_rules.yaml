@@ -1,0 +1,72 @@
+# config/quality_rules.yaml
+quality_rules:
+  # 数据完整性规则
+  completeness:
+    - name: "missing_price_data"
+      description: "缺失价格数据检查"
+      severity: "ERROR"
+      sql: "SELECT symbol, trade_date FROM stock_daily_data WHERE open_price IS NULL OR close_price IS NULL OR high_price IS NULL OR low_price IS NULL"
+
+    - name: "missing_volume_data"
+      description: "缺失成交量数据检查"
+      severity: "WARNING"
+      sql: "SELECT symbol, trade_date FROM stock_daily_data WHERE volume IS NULL OR volume = 0"
+
+  # 业务逻辑规则
+  business_logic:
+    - name: "price_range_check"
+      description: "价格范围合理性检查"
+      severity: "ERROR"
+      condition: "low_price <= open_price <= high_price AND low_price <= close_price <= high_price"
+
+    - name: "volume_positive"
+      description: "成交量为正数"
+      severity: "ERROR"
+      condition: "volume >= 0"
+
+    - name: "pct_change_limit"
+      description: "涨跌幅限制检查（股票涨跌幅应在±20%内）"
+      severity: "WARNING"
+      condition: "abs(pct_change) <= 20.0"
+
+  # 一致性规则
+  consistency:
+    - name: "date_continuity"
+      description: "交易日期连续性检查"
+      severity: "WARNING"
+      algorithm: "date_gap_detection"
+
+    - name: "pre_close_consistency"
+      description: "前收盘价与昨日收盘价一致性"
+      severity: "ERROR"
+      sql: |
+        SELECT t1.symbol, t1.trade_date, t1.pre_close_price, t2.close_price as prev_close
+        FROM stock_daily_data t1
+        LEFT JOIN stock_daily_data t2 ON t1.symbol = t2.symbol AND t2.trade_date = DATE_SUB(t1.trade_date, INTERVAL 1 DAY)
+        WHERE ABS(t1.pre_close_price - t2.close_price) > 0.01
+
+  # 统计异常检测规则
+  statistical:
+    - name: "price_outlier_3sigma"
+      description: "3σ价格异常检测"
+      severity: "WARNING"
+      algorithm: "z_score"
+      threshold: 3.0
+
+    - name: "volume_spike"
+      description: "成交量异常放大检测"
+      severity: "WARNING"
+      algorithm: "iqr"
+      threshold: 1.5
+
+validation:
+  batch_size: 100
+  parallel_workers: 4
+  max_memory_gb: 2
+  timeout_seconds: 300
+
+adjustment:
+  forward_adjust_method: "factor"
+  backward_adjust_method: "factor"
+  keep_original_price: true
+  cache_factors: true

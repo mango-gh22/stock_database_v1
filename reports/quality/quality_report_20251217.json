@@ -1,0 +1,108 @@
+{
+  "timestamp": "2025-12-17T06:19:00.313408",
+  "checks": [
+    {
+      "type": "completeness",
+      "result": {
+        "total_symbols": 74,
+        "sample_size": 50,
+        "missing_data_count": 50,
+        "completeness_rate": 0.0,
+        "missing_symbols": [
+          "601766.SH",
+          "600009.SH",
+          "600030.SH",
+          "000338.SZ",
+          "600415.SH",
+          "600031.SH",
+          "600309.SH",
+          "002594.SZ",
+          "300124.SZ",
+          "000617.SZ"
+        ]
+      }
+    },
+    {
+      "type": "business_rules",
+      "result": {
+        "sample_size": 10,
+        "total_violations": 0,
+        "violation_rate": 0.0,
+        "detailed_violations": []
+      }
+    },
+    {
+      "type": "anomaly_detection",
+      "result": {
+        "sample_size": 20,
+        "total_anomalies": 0,
+        "anomaly_rate": 0.0,
+        "anomaly_details": []
+      }
+    },
+    {
+      "type": "adjustment_validation",
+      "result": {
+        "sample_size": 5,
+        "valid_adjustments": 0,
+        "validation_rate": 0.0,
+        "results": [
+          {
+            "symbol": "002352.SZ",
+            "has_factors": false,
+            "factor_count": 0,
+            "adjustment_test": {},
+            "errors": []
+          },
+          {
+            "symbol": "002594.SZ",
+            "has_factors": false,
+            "factor_count": 0,
+            "adjustment_test": {},
+            "errors": []
+          },
+          {
+            "symbol": "600048.SH",
+            "has_factors": false,
+            "factor_count": 0,
+            "adjustment_test": {},
+            "errors": []
+          },
+          {
+            "symbol": "601601.SH",
+            "has_factors": false,
+            "factor_count": 0,
+            "adjustment_test": {},
+            "errors": []
+          },
+          {
+            "symbol": "603019.SH",
+            "has_factors": false,
+            "factor_count": 0,
+            "adjustment_test": {},
+            "errors": []
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "total_checks": 4,
+    "check_time": "2025-12-17T06:19:00.785413",
+    "metrics": {
+      "completeness_rate": 0.0,
+      "violation_rate": 0.0,
+      "anomaly_rate": 0.0,
+      "adjustment_validation_rate": 0.0
+    },
+    "quality_score": 0.0
+  },
+  "alerts": [
+    {
+      "type": "completeness",
+      "severity": "ERROR",
+      "message": "数据完整性率低: 0.00%",
+      "threshold": 0.95
+    }
+  ]
+}

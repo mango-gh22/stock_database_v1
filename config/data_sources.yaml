@@ -1,0 +1,33 @@
+# config/data_sources.yaml
+data_sources:
+  tushare:
+    enabled: true
+    api_key: "您的tushare token"  # 可以从系统变量TUSHARE_TOKEN 或 .env中同名获取
+    endpoints:
+      daily: "/api/market/get_daily"
+      basic_info: "/api/stock/get_basic_info"
+      minute: "/api/market/get_minute"
+    rate_limit: 500  # 每分钟请求限制
+    retry_times: 3
+
+  akshare:
+    enabled: true
+    endpoints:
+      daily: "stock_zh_a_hist"
+      minute: "stock_zh_a_minute"
+
+  baostock:
+    enabled: false
+    endpoints:
+      daily: "query_history_k_data"
+
+
+adjustment_factors:
+  baostock:
+    enabled: true
+    endpoint: "query_dividend_data"
+    fields: [ "symbol", "dividPreNoticeDate", "dividAgmPumDate", "dividCashPsBeforeTax" ]
+  tushare:
+    enabled: true
+    endpoint: "dividend"
+    fields: [ "ts_code", "ann_date", "ex_date", "cash_div" ]

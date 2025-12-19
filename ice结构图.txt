@@ -1,0 +1,191 @@
+stock_database_v1/
+├── config
+│   ├── 930050closeweight.xls
+│   ├── 930050cons.xls
+│   ├── 930050indicator.xls
+│   ├── __init__.py
+│   ├── data_sources.yaml
+│   ├── datab.yaml
+│   ├── database.yaml
+│   ├── generate_a50_symbols_yaml.py
+│   ├── pipeline_config.yaml
+│   ├── query_config.yaml
+│   ├── symbols.yaml
+│   ├── symbols_copy.yaml
+│   └── tushare_config.yaml
+├── data
+│   ├── cache
+│   │   ├── baostock
+│   │   └── tushare
+│   ├── exports
+│   │   ├── p4_demo_export.csv
+│   │   └── p4_final_test.csv
+│   ├── processed
+│   ├── raw
+│   ├── reports
+│   │   ├── batch_update_20251207_223713.json
+│   │   ├── batch_update_20251207_223746.json
+│   │   ├── pipeline_incremental_20251214_103310.json
+│   │   ├── pipeline_incremental_20251214_105242.json
+│   │   ├── pipeline_incremental_20251214_110242.json
+│   │   ├── pipeline_report_20251210_201746.json
+│   │   ├── pipeline_report_20251210_202513.json
+│   │   ├── pipeline_report_20251210_202649.json
+│   │   ├── pipeline_report_20251210_204344.json
+│   │   ├── pipeline_report_20251210_205005.json
+│   │   ├── pipeline_report_20251210_205603.json
+│   │   ├── pipeline_report_20251210_210229.json
+│   │   ├── pipeline_report_20251210_212836.json
+│   │   ├── pipeline_report_20251210_215842.json
+│   │   ├── pipeline_report_20251211_061449.json
+│   │   ├── pipeline_report_20251212_211750.json
+│   │   ├── pipeline_report_20251212_213405.json
+│   │   ├── pipeline_report_20251212_213525.json
+│   │   ├── pipeline_report_20251212_213801.json
+│   │   ├── pipeline_report_20251212_223051.json
+│   │   ├── pipeline_report_20251212_224433.json
+│   │   ├── pipeline_report_20251212_224946.json
+│   │   ├── pipeline_report_20251212_225318.json
+│   │   ├── pipeline_report_20251212_231301.json
+│   │   ├── pipeline_report_20251212_231714.json
+│   │   ├── pipeline_report_20251212_233650.json
+│   │   ├── pipeline_report_20251213_083349.json
+│   │   ├── pipeline_report_20251213_120148.json
+│   │   ├── pipeline_report_20251213_212800.json
+│   │   ├── pipeline_specific_20251214_103311.json
+│   │   ├── pipeline_specific_20251214_105242.json
+│   │   └── pipeline_specific_20251214_110242.json
+│   └── ths_export
+├── logs
+│   ├── app.log
+│   ├── stock_database_20251205.log
+│   ├── stock_database_20251206.log
+│   ├── stock_database_20251210.log
+│   ├── stock_database_20251211.log
+│   ├── stock_database_20251212.log
+│   ├── stock_database_20251213.log
+│   └── stock_database_20251214.log
+├── scripts
+│   ├── schema
+│   │   ├── create_tables_complete.sql
+│   │   ├── create_tables_fixed.sql
+│   │   └── fix_collation.sql
+│   ├── collect_a50_daily.py
+│   ├── diagnose_collations.py
+│   ├── fix_collations.py
+│   ├── fix_column_mapping.py
+│   ├── rellback_daily_table_full.py
+│   ├── setup_database.sql
+│   ├── setup_mysql.py
+│   ├── update_daily_table_full.py
+│   ├── update_table_schema.py
+│   └── 文件3个说明.txt
+├── src
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── config_loader.py
+│   │   ├── logging_config.py
+│   │   ├── pipeline_config_loader.py
+│   │   ├── secret_loader.py
+│   │   └── token_loader.py
+│   ├── core
+│   ├── data
+│   │   ├── logs
+│   │   │   ├── app.log
+│   │   │   ├── stock_database_20251207.log
+│   │   │   └── stock_database_20251214.log
+│   │   ├── __init__.py
+│   │   ├── adaptive_storage.py
+│   │   ├── akshare_collector.py
+│   │   ├── baostock_collector.py
+│   │   ├── check_table_schema.py
+│   │   ├── data_collector.py
+│   │   ├── data_manager.py
+│   │   ├── data_pipeline.py
+│   │   ├── data_processor.py
+│   │   ├── data_scheduler.py
+│   │   ├── data_storage.py
+│   │   ├── data_storage.py.backup
+│   │   ├── date_calculator.py
+│   │   ├── diagnose_storage.py
+│   │   ├── enhanced_processor.py
+│   │   ├── import_csi_a50.py
+│   │   ├── integrated_pipeline.py
+│   │   ├── integrated_pipeline_fixed.py
+│   │   ├── pipeline_fix.py
+│   │   ├── simple_storage.py
+│   │   ├── symbol_manager.py
+│   │   └── tushare_collector.py
+│   ├── data_processing
+│   │   ├── __init__.py
+│   │   └── base_processor.py
+│   ├── data_sources
+│   ├── database
+│   │   ├── schema
+│   │   │   ├── __init__.py
+│   │   │   └── daily_table_schema.sql
+│   │   ├── __init__.py
+│   │   ├── connection.py
+│   │   ├── database_manager.py
+│   │   └── db_connector.py
+│   ├── downloaders
+│   ├── processors
+│   │   └── __init__.py
+│   ├── query
+│   │   ├── __init__.py
+│   │   ├── analytics.py
+│   │   ├── dynamic_query_engine.py
+│   │   ├── export.py
+│   │   ├── indicators.py
+│   │   ├── query_builder.py
+│   │   ├── query_engine.py
+│   │   ├── query_engine.py.backup
+│   │   ├── query_engine.py.backup_reserved
+│   │   └── query_engine.py.backup_standard
+│   ├── utils
+│   │   ├── __init__.py
+│   │   ├── code_converter.py
+│   │   └── logger.py
+│   └── __init__.py
+├── tests
+│   ├── data
+│   │   └── __init__.py
+│   ├── demo
+│   │   ├── demo_get_index_stock_a50.py
+│   │   └── demo_get_zza50_stock.py
+│   ├── docs
+│   ├── integration
+│   ├── query
+│   │   ├── __init__.py
+│   │   ├── test_analytics.py
+│   │   ├── test_export.py
+│   │   ├── test_indicators.py
+│   │   └── test_query_engine.py
+│   ├── scripts
+│   ├── unit
+│   ├── __init__.py
+│   ├── demo_akshare_index_stock.py
+│   ├── demo_baostock_index_stock.py
+│   ├── demo_database_123.py
+│   ├── demo_database_mysql.py
+│   ├── demo_database_password.py
+│   ├── demo_ths_index_stock.py
+│   ├── demo_黑板.py
+│   ├── test_token_valid.py
+│   └── unitl_index_stock.py
+├── .env
+├── .gitignore
+├── ice结构图.txt
+├── import_a50.py
+├── local_data_collector.py
+├── main.py
+├── quick_test.py
+├── README.md
+├── requirements.txt
+├── run.py
+├── setup.py
+├── table_name_adapter.py
+├── test_architecture_fix.py
+├── test_enhanced_storage.py
+├── tree_全配置.py
+└── update_a50_components.py
