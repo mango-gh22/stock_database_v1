@@ -25,6 +25,17 @@ config/*.xls
 tests/demo/
 tests/demo*
 
+#----涉及敏感信息类--------
+.env
+*.key
+*.pem
+*.p12
+secrets.yaml
+config.local.yaml
+.DS_Store
+*.log
+
+
 # 包管理
 Pipfile.lock
 poetry.lock

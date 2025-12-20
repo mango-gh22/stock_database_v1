@@ -1,0 +1,56 @@
+# 技术指标配置
+# 版本: v0.6.0-P6
+
+indicators:
+  # 趋势指标
+  trend:
+    ma:
+      enabled: true
+      periods: [5, 10, 20, 30, 60, 120, 250]
+      types: ['sma', 'ema']
+
+    macd:
+      enabled: true
+      fast_period: 12
+      slow_period: 26
+      signal_period: 9
+
+  # 动量指标
+  momentum:
+    rsi:
+      enabled: true
+      period: 14
+      overbought: 70
+      oversold: 30
+
+    kdj:
+      enabled: true
+      k_period: 9
+      d_period: 3
+      j_period: 3
+
+  # 波动率指标
+  volatility:
+    bollinger:
+      enabled: true
+      period: 20
+      std_dev: 2
+
+    atr:
+      enabled: true
+      period: 14
+
+  # 成交量指标
+  volume:
+    obv:
+      enabled: true
+    vwap:
+      enabled: true
+
+# 计算参数
+calculation:
+  price_field: 'close'          # 使用哪个价格字段
+  adjust_price: true           # 是否使用复权价格
+  fill_method: 'ffill'         # 缺失值填充方法
+  cache_results: true          # 是否缓存计算结果
+  parallel_workers: 4          # 并行计算线程数
