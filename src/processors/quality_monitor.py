@@ -4,11 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/14 15:37
 """
-desc 
-"""
-
-# src/processors/quality_monitor.py
-"""
+desc
 质量监控器 - 自动化质量检查与报告
 """
 

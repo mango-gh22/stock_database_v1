@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-20T23:16:17.507217",
+  "timestamp": "2025-12-21T01:36:45.678303",
   "checks": [
     {
       "type": "completeness",
@@ -9,16 +9,16 @@
         "missing_data_count": 50,
         "completeness_rate": 0.0,
         "missing_symbols": [
+          "300760.SZ",
           "601318.SH",
-          "600009.SH",
-          "600887.SH",
-          "600600.SH",
-          "601668.SH",
-          "000938.SZ",
           "002271.SZ",
+          "600111.SH",
+          "600887.SH",
+          "600754.SH",
+          "600309.SH",
           "601398.SH",
-          "300015.SZ",
-          "300124.SZ"
+          "600600.SH",
+          "601225.SH"
         ]
       }
     },
@@ -48,35 +48,35 @@
         "validation_rate": 0.0,
         "results": [
           {
-            "symbol": "600941.SH",
+            "symbol": "000338.SZ",
             "has_factors": false,
             "factor_count": 0,
             "adjustment_test": {},
             "errors": []
           },
           {
-            "symbol": "002371.SZ",
+            "symbol": "600660.SH",
             "has_factors": false,
             "factor_count": 0,
             "adjustment_test": {},
             "errors": []
           },
           {
-            "symbol": "600276.SH",
+            "symbol": "601038.SH",
             "has_factors": false,
             "factor_count": 0,
             "adjustment_test": {},
             "errors": []
           },
           {
-            "symbol": "603993.SH",
+            "symbol": "300122.SZ",
             "has_factors": false,
             "factor_count": 0,
             "adjustment_test": {},
             "errors": []
           },
           {
-            "symbol": "601888.SH",
+            "symbol": "600406.SH",
             "has_factors": false,
             "factor_count": 0,
             "adjustment_test": {},
@@ -88,7 +88,7 @@
   ],
   "summary": {
     "total_checks": 4,
-    "check_time": "2025-12-20T23:16:18.526197",
+    "check_time": "2025-12-21T01:36:51.908300",
     "metrics": {
       "completeness_rate": 0.0,
       "violation_rate": 0.0,

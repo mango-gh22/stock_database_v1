@@ -13,6 +13,7 @@ MACD指标（指数平滑异同移动平均线）
 """
 import pandas as pd
 import numpy as np
+from typing import List, Dict, Optional
 from ..base_indicator import BaseIndicator, IndicatorType
 import logging
 

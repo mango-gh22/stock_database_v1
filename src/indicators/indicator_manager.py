@@ -71,7 +71,7 @@ class IndicatorManager:
 
     def _register_builtin_indicators(self):
         """注册内置指标"""
-        from .trend.moving_average import MovingAverage
+        from src.indicators.trend.moving_average import MovingAverage
         from .trend.macd import MACD
         from .momentum.rsi import RSI
         from .volatility.bollinger_bands import BollingerBands

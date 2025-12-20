@@ -1,5 +1,5 @@
 # _*_ coding: utf-8 _*_
-# File Path: E:/MyFile/stock_database_v1/src/indicators/trend\moving_arerage.py
+# File Path: E:/MyFile/stock_database_v1/src/indicators/trend\moving_average.py
 # File Name: moving_arerage
 # @ Author: mango-gh22
 # @ Date：2025/12/17 6:15
