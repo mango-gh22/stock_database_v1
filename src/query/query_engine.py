@@ -153,15 +153,16 @@ class QueryEngine:
                 SELECT 
                     trade_date, 
                     symbol,
-                    open_price as open,
-                    high_price as high,
-                    low_price as low,
-                    close_price as close,
+
+                    open_price,
+                    high_price,
+                    low_price,
+                    close_price,
                     volume,
                     amount,
                     change_percent as pct_change,
                     change_percent as price_change,
-#                     change_amount as price_change,
+
                     pre_close_price as pre_close,
                     turnover_rate,
                     amplitude,
@@ -173,13 +174,57 @@ class QueryEngine:
             """
             params.append(limit)
 
+            print(f"🔍 调试：执行的SQL查询语句：")
+            print(f"SQL: {query}")
+            print(f"参数: {params}")
+
+
             # 执行查询
             result = self.db_connector.execute_query(query, tuple(params))
+
+            print(f"🔍 调试：查询返回结果类型：{type(result)}")
+            if result:
+                print(f"🔍 调试：返回结果第一行：{result[0] if result else '空'}")
+                print(f"🔍 调试：返回列数：{len(result[0]) if result else 0}")
+
 
             # 转换为DataFrame
             df = pd.DataFrame(result) if result else pd.DataFrame()
 
             if not df.empty:
+
+                # ============ 修复2：定义正确的列名 ============
+                # 根据查询语句，定义列名映射
+                expected_columns = [
+                    'trade_date', 'symbol', 'open_price', 'high_price', 'low_price',
+                    'close_price', 'volume', 'amount', 'pct_change', 'price_change',
+                    'pre_close', 'turnover_rate', 'amplitude', 'ma5', 'ma10', 'ma20'
+                ]
+
+                # 如果DataFrame没有列名，则设置列名
+                if df.columns.tolist() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]:
+                    df.columns = expected_columns
+
+                # ============ 修复3：双重兼容处理 ============
+                # 如果返回的列名是简化的，映射为标准名称
+                column_mapping = {
+                    'open': 'open_price',
+                    'high': 'high_price',
+                    'low': 'low_price',
+                    'close': 'close_price'
+                }
+
+                # 只重命名存在的列
+                rename_dict = {}
+                for old_name, new_name in column_mapping.items():
+                    if old_name in df.columns and new_name not in df.columns:
+                        rename_dict[old_name] = new_name
+
+                if rename_dict:
+                    df = df.rename(columns=rename_dict)
+                    logger.info(f"列名标准化: {rename_dict}")
+                # ============ 修复结束 ============
+
                 # 转换日期类型
                 if 'trade_date' in df.columns:
                     # df['trade_date'] = pd.to_datetime(df['trade_date'])
