@@ -32,38 +32,7 @@ stock_database_v1/
 │   ├── reports
 │   │   ├── batch_20251228_171715.json
 │   │   ├── batch_20251228_214518.json
-│   │   ├── batch_20251231_213453.json
-│   │   ├── batch_20251231_214732.json
-│   │   ├── batch_update_20251207_223713.json
-│   │   ├── batch_update_20251207_223746.json
-│   │   ├── pipeline_incremental_20251214_103310.json
-│   │   ├── pipeline_incremental_20251214_105242.json
-│   │   ├── pipeline_incremental_20251214_110242.json
-│   │   ├── pipeline_report_20251210_201746.json
-│   │   ├── pipeline_report_20251210_202513.json
-│   │   ├── pipeline_report_20251210_202649.json
-│   │   ├── pipeline_report_20251210_204344.json
-│   │   ├── pipeline_report_20251210_205005.json
-│   │   ├── pipeline_report_20251210_205603.json
-│   │   ├── pipeline_report_20251210_210229.json
-│   │   ├── pipeline_report_20251210_212836.json
-│   │   ├── pipeline_report_20251210_215842.json
-│   │   ├── pipeline_report_20251211_061449.json
-│   │   ├── pipeline_report_20251212_211750.json
-│   │   ├── pipeline_report_20251212_213405.json
-│   │   ├── pipeline_report_20251212_213525.json
-│   │   ├── pipeline_report_20251212_213801.json
-│   │   ├── pipeline_report_20251212_223051.json
-│   │   ├── pipeline_report_20251212_224433.json
-│   │   ├── pipeline_report_20251212_224946.json
-│   │   ├── pipeline_report_20251212_225318.json
-│   │   ├── pipeline_report_20251212_231301.json
-│   │   ├── pipeline_report_20251212_231714.json
-│   │   ├── pipeline_report_20251212_233650.json
-│   │   ├── pipeline_report_20251213_083349.json
-│   │   ├── pipeline_report_20251213_120148.json
-│   │   ├── pipeline_report_20251213_212800.json
-│   │   ├── pipeline_specific_20251214_103311.json
+...
 │   │   ├── pipeline_specific_20251214_105242.json
 │   │   └── pipeline_specific_20251214_110242.json
 │   ├── ths_export
@@ -85,27 +54,14 @@ stock_database_v1/
 │   ├── calculations
 │   ├── app.log
 │   ├── stock_database_20251205.log
-│   ├── stock_database_20251206.log
-│   ├── stock_database_20251210.log
-│   ├── stock_database_20251211.log
-│   ├── stock_database_20251212.log
-│   ├── stock_database_20251213.log
-│   ├── stock_database_20251214.log
-│   ├── stock_database_20251216.log
-│   ├── stock_database_20251217.log
-│   ├── stock_database_20251220.log
-│   ├── stock_database_20251221.log
-│   ├── stock_database_20251222.log
-│   ├── stock_database_20251226.log
-│   ├── stock_database_20251227.log
+...
 │   ├── stock_database_20251228.log
-│   └── stock_database_20251231.log
+│   ├── stock_database_20251231.log
+│   └── stock_database_20260101.log
 ├── reports
 │   └── quality
 │       ├── quality_report_20251214.json
-│       ├── quality_report_20251216.json
-│       ├── quality_report_20251217.json
-│       ├── quality_report_20251220.json
+...
 │       └── quality_report_20251221.json
 ├── scripts
 │   ├── data
@@ -138,7 +94,7 @@ stock_database_v1/
 │   ├── update_a50_components.py
 │   ├── update_daily_table_full.py
 │   ├── update_table_schema.py
-│   └── 文件3个说明.txt
+│   └──
 ├── src
 │   ├── api
 │   │   ├── __init__.py
@@ -175,10 +131,10 @@ stock_database_v1/
 │   │   ├── data_collector.py
 │   │   ├── data_manager.py
 │   │   ├── data_pipeline.py
+│   │   ├── data_pipeline.py.backup_20260101_160351
 │   │   ├── data_processor.py
 │   │   ├── data_scheduler.py
 │   │   ├── data_storage.py
-│   │   ├── data_storage.py.backup
 │   │   ├── date_calculator.py
 │   │   ├── diagnose_storage.py
 │   │   ├── enhanced_processor.py
@@ -309,69 +265,24 @@ stock_database_v1/
 │   ├── scripts
 │   ├── unit
 │   ├── __init__.py
-│   ├── demo_akshare_index_stock.py
-│   ├── demo_baostock_index_stock.py
-│   ├── demo_database_123.py
-│   ├── demo_database_mysql.py
-│   ├── demo_database_password.py
-│   ├── demo_ths_index_stock.py
-│   ├── demo_黑板.py
 │   ├── test_mysql_connector.py
 │   ├── test_token_valid.py
 │   └── unitl_index_stock.py
 ├── .env
 ├── .gitignore
 ├── benchmark_p6.py
-├── check_database_reality.py
-├── create_release_note.py
-├── diagnose_data_storage.py
-├── diagnose_storage.py
-├── fix_all_column_mappings.py
-├── fix_columns_simple.py
-├── ice结构图.txt
 ├── import_a50.py
 ├── local_data_collector.py
 ├── main.py
 ├── P5_COMPLETION_SUMMARY.md
 ├── P6_IMPLEMENTATION_PLAN.md
-├── performance_test.py
 ├── quick_check.py
-├── quick_root_test.py
-├── quick_test.py
 ├── README.md
-├── RELEASE_v0.5.1.json
-├── requirements.txt
 ├── run.py
-├── run_quality_tests.py
 ├── setup.py
 ├── simple_db_query.py
 ├── stock_database_P5_completed_.tar.gz
 ├── stock_database_v0.5.1.zip
-├── storage_diagnostic_20251228_183727.txt
 ├── table_name_adapter.py
 ├── test.zip
-├── test_architecture_fix.py
-├── test_column_order.py
-├── test_direct_insert.py
-├── test_enhanced_storage.py
-├── test_field_fix.py
-├── test_integration.py
-├── test_p6_basic.py
-├── test_p6_complete.py
-├── test_p6_fix.py
-├── test_p6_functional.py
-├── test_p6_step_by_step.py
-├── test_pipeline_simple.py
-├── test_quality_模块.py
-├── test_raw_data.py
-├── test_safe_storage.py
-├── test_safe_storage_v2.py
-├── test_simple.py
-├── test_sql_consistency.py
-├── test_storage_fixed.py
-├── test_storage_log.py
-├── test_write.py
-├── tree_全配置.py
-├── ultimate_verification.py
-├── verify_data.py
-└── verify_data_persistence.py
+└── user_manager.py
