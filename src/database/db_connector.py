@@ -23,13 +23,21 @@ logger = logging.getLogger(__name__)
 class DatabaseConnector:
     """数据库连接器类 - 增强版"""
 
-    def __init__(self, config_path: str = 'config/database.yaml'):
+    def __init__(self, config_path: str = None):  # ✅ 将默认改为 None
         """
         初始化数据库连接器
 
         Args:
-            config_path: 数据库配置文件路径
+            config_path: 数据库配置文件路径，如果为 None 则使用默认路径
         """
+        # v0.6.0 修复：处理 None 情况
+        if config_path is None:
+            from pathlib import Path
+            # 计算项目根目录路径
+            project_root = Path(__file__).parent.parent.parent
+            config_path = str(project_root / "config" / "database.yaml")
+            logger.info(f"使用默认数据库配置路径: {config_path}")
+
         self.config_path = config_path
         self.config = self._load_and_validate_config()
         self.connection_pool = None
