@@ -1,0 +1,543 @@
+components:
+  schemas:
+    AsyncTaskStatus:
+      properties:
+        completed_at:
+          format: date-time
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        error:
+          type: string
+        progress:
+          maximum: 1
+          minimum: 0
+          type: number
+        started_at:
+          format: date-time
+          type: string
+        status:
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - cancelled
+          type: string
+        task_id:
+          type: string
+      type: object
+    BaseResponse:
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+        timestamp:
+          format: date-time
+          type: string
+      type: object
+    CalculationStatus:
+      description: 计算状态
+      properties: {}
+      type: object
+    IndicatorInfo:
+      properties:
+        description:
+          type: string
+        min_data_points:
+          type: integer
+        name:
+          type: string
+        parameters:
+          type: object
+        requires_adjusted_price:
+          type: boolean
+        type:
+          type: string
+      type: object
+    IndicatorRequest:
+      description: 指标计算请求
+      properties:
+        end_date:
+          description: 结束日期，格式：YYYY-MM-DD
+          title: End Date
+          type: string
+        indicators:
+          description: 指标名称列表
+          items:
+            type: string
+          title: Indicators
+          type: array
+        start_date:
+          description: 开始日期，格式：YYYY-MM-DD
+          title: Start Date
+          type: string
+        symbol:
+          description: 股票代码，如：sh600519
+          title: Symbol
+          type: string
+        use_cache:
+          default: true
+          description: 是否使用缓存
+          title: Use Cache
+          type: boolean
+      type: object
+    ValidationRequest:
+      description: 验证请求
+      properties:
+        end_date:
+          description: 结束日期
+          title: End Date
+          type: string
+        indicator:
+          description: 指标名称
+          title: Indicator
+          type: string
+        start_date:
+          description: 开始日期
+          title: Start Date
+          type: string
+        symbol:
+          description: 股票代码
+          title: Symbol
+          type: string
+      type: object
+  securitySchemes:
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+externalDocs:
+  description: 完整文档
+  url: https://github.com/yourusername/stock_database
+info:
+  contact:
+    email: support@example.com
+    name: 技术支持
+  description: 股票技术指标计算API - 提供多种技术指标计算服务
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: 股票技术指标计算API
+  version: 1.0.0
+openapi: 3.0.0
+paths:
+  /:
+    get:
+      description: API根目录
+      operationId: null
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: null
+      tags:
+      - general
+  /docs:
+    get:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - system
+    head:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - system
+  /docs/oauth2-redirect:
+    get:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - general
+    head:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - general
+  /health:
+    get:
+      description: 健康检查
+      operationId: null
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: null
+      tags:
+      - system
+  /indicators/available:
+    get:
+      description: "获取所有可用指标\n\nReturns:\n    可用指标列表和信息"
+      operationId: null
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: null
+      tags:
+      - indicators
+  /indicators/calculate:
+    post:
+      description: "计算技术指标\n\nArgs:\n    request: 指标计算请求\n\nReturns:\n    包含技术指标的数据"
+      operationId: null
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 指标计算结果
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: null
+      tags:
+      - indicators
+  /indicators/calculate/batch:
+    get:
+      description: "批量计算技术指标\n\nArgs:\n    symbols: 股票代码列表\n    indicators: 指标列表\n\
+        \    start_date: 开始日期\n    end_date: 结束日期\n\nReturns:\n    批量计算结果"
+      operationId: null
+      parameters:
+      - description: 股票代码列表，用逗号分隔
+        in: query
+        name: symbols
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 指标名称列表，用逗号分隔
+        in: query
+        name: indicators
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: null
+      tags:
+      - indicators
+  /indicators/validate:
+    post:
+      description: "验证指标计算可行性\n\nArgs:\n    request: 验证请求\n\nReturns:\n    验证结果"
+      operationId: null
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: null
+      tags:
+      - indicators
+  /openapi.json:
+    get:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - general
+    head:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - general
+  /redoc:
+    get:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - system
+    head:
+      description: ''
+      operationId: ''
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                  message:
+                    type: string
+                  success:
+                    type: boolean
+                type: object
+          description: 成功响应
+        '400':
+          description: 请求参数错误
+        '404':
+          description: 资源不存在
+        '500':
+          description: 服务器内部错误
+      summary: ''
+      tags:
+      - system
+servers:
+- description: 本地开发服务器
+  url: http://127.0.0.1:8000
+- description: 生产服务器
+  url: https://api.example.com
+tags:
+- description: 技术指标计算相关接口
+  name: indicators
+- description: 异步计算相关接口
+  name: async
+- description: 系统管理接口
+  name: system

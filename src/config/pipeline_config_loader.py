@@ -4,12 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/14 8:35
 """
-desc 
-"""
-
-# src/config/pipeline_config_loader.py
-"""
-管道配置加载器 - 专门处理三种更新模式配置
+desc 管道配置加载器 - 专门处理三种更新模式配置
 """
 
 import yaml

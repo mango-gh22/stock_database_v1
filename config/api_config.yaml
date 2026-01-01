@@ -1,0 +1,30 @@
+api:
+  description: "\u63D0\u4F9B\u80A1\u7968\u6280\u672F\u6307\u6807\u8BA1\u7B97\u670D\
+    \u52A1"
+  docs_url: /docs
+  openapi_url: /openapi.json
+  redoc_url: /redoc
+  title: "\u80A1\u7968\u6280\u672F\u6307\u6807\u8BA1\u7B97API"
+  version: 1.0.0
+cors:
+  allow_headers:
+  - '*'
+  allow_methods:
+  - '*'
+  allow_origins:
+  - '*'
+  enabled: true
+limits:
+  max_request_size: 10MB
+  rate_limit: 100/minute
+  timeout: 300
+security:
+  api_key: null
+  enabled: false
+  jwt_secret: null
+server:
+  host: 127.0.0.1
+  log_level: info
+  port: 8000
+  reload: true
+  workers: 1

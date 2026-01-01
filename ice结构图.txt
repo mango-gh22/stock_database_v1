@@ -4,11 +4,16 @@ stock_database_v1/
 │   ├── 930050cons.xls
 │   ├── 930050indicator.xls
 │   ├── __init__.py
+│   ├── api_config.yaml
 │   ├── data_sources.yaml
 │   ├── datab.yaml
 │   ├── database.yaml
 │   ├── generate_a50_symbols_yaml.py
+│   ├── indicators.yaml
+│   ├── performance.yaml
+│   ├── performance_备份.yaml
 │   ├── pipeline_config.yaml
+│   ├── quality_rules.yaml
 │   ├── query_config.yaml
 │   ├── symbols.yaml
 │   ├── symbols_copy.yaml
@@ -16,13 +21,19 @@ stock_database_v1/
 ├── data
 │   ├── cache
 │   │   ├── baostock
+│   │   ├── indicators
 │   │   └── tushare
 │   ├── exports
 │   │   ├── p4_demo_export.csv
-│   │   └── p4_final_test.csv
+│   │   ├── p4_final_test.csv
+│   │   └── test_export_sh600519.csv
 │   ├── processed
 │   ├── raw
 │   ├── reports
+│   │   ├── batch_20251228_171715.json
+│   │   ├── batch_20251228_214518.json
+│   │   ├── batch_20251231_213453.json
+│   │   ├── batch_20251231_214732.json
 │   │   ├── batch_update_20251207_223713.json
 │   │   ├── batch_update_20251207_223746.json
 │   │   ├── pipeline_incremental_20251214_103310.json
@@ -55,8 +66,23 @@ stock_database_v1/
 │   │   ├── pipeline_specific_20251214_103311.json
 │   │   ├── pipeline_specific_20251214_105242.json
 │   │   └── pipeline_specific_20251214_110242.json
-│   └── ths_export
+│   ├── ths_export
+│   └── test_stock_data.csv
+├── docs
+│   ├── api
+│   │   ├── clients
+│   │   │   ├── stock_indicator_client.js
+│   │   │   └── stock_indicator_client.py
+│   │   ├── API_DOCUMENTATION.md
+│   │   ├── openapi.json
+│   │   ├── openapi.yaml
+│   │   └── redoc.html
+│   └── P6
+├── examples
+│   ├── __init__.py
+│   └── basic_indicators_usage.py
 ├── logs
+│   ├── calculations
 │   ├── app.log
 │   ├── stock_database_20251205.log
 │   ├── stock_database_20251206.log
@@ -64,9 +90,32 @@ stock_database_v1/
 │   ├── stock_database_20251211.log
 │   ├── stock_database_20251212.log
 │   ├── stock_database_20251213.log
-│   └── stock_database_20251214.log
+│   ├── stock_database_20251214.log
+│   ├── stock_database_20251216.log
+│   ├── stock_database_20251217.log
+│   ├── stock_database_20251220.log
+│   ├── stock_database_20251221.log
+│   ├── stock_database_20251222.log
+│   ├── stock_database_20251226.log
+│   ├── stock_database_20251227.log
+│   ├── stock_database_20251228.log
+│   └── stock_database_20251231.log
+├── reports
+│   └── quality
+│       ├── quality_report_20251214.json
+│       ├── quality_report_20251216.json
+│       ├── quality_report_20251217.json
+│       ├── quality_report_20251220.json
+│       └── quality_report_20251221.json
 ├── scripts
+│   ├── data
+│   │   └── cache
+│   │       └── indicators
+│   ├── logs
+│   │   ├── app.log
+│   │   └── stock_database_20251227.log
 │   ├── schema
+│   │   ├── create_quality_tables.sql
 │   │   ├── create_tables_complete.sql
 │   │   ├── create_tables_fixed.sql
 │   │   └── fix_collation.sql
@@ -74,30 +123,54 @@ stock_database_v1/
 │   ├── diagnose_collations.py
 │   ├── fix_collations.py
 │   ├── fix_column_mapping.py
-│   ├── rellback_daily_table_full.py
+│   ├── fix_existing_dates.py
+│   ├── quick_validate_all.py
+│   ├── rollback_daily_table_full.py
+│   ├── run_query_tests.py
+│   ├── seed_test_data.py
 │   ├── setup_database.sql
+│   ├── setup_indicators.py
 │   ├── setup_mysql.py
+│   ├── start_api_server.py
+│   ├── test_complete_system.py
+│   ├── test_indicators_basic.py
+│   ├── test_refactored_indicators.py
+│   ├── update_a50_components.py
 │   ├── update_daily_table_full.py
 │   ├── update_table_schema.py
 │   └── 文件3个说明.txt
 ├── src
+│   ├── api
+│   │   ├── __init__.py
+│   │   ├── api_docs.py
+│   │   ├── async_calculator.py
+│   │   └── indicators_api.py
 │   ├── config
 │   │   ├── __init__.py
 │   │   ├── config_loader.py
+│   │   ├── config_validator.py
 │   │   ├── logging_config.py
+│   │   ├── performance.yaml
 │   │   ├── pipeline_config_loader.py
 │   │   ├── secret_loader.py
 │   │   └── token_loader.py
 │   ├── core
 │   ├── data
+│   │   ├── data
+│   │   │   └── cache
+│   │   │       └── baostock
 │   │   ├── logs
 │   │   │   ├── app.log
 │   │   │   ├── stock_database_20251207.log
-│   │   │   └── stock_database_20251214.log
+│   │   │   ├── stock_database_20251214.log
+│   │   │   └── stock_database_20251229.log
 │   │   ├── __init__.py
 │   │   ├── adaptive_storage.py
+│   │   ├── adjustment_factor_collector.py
+│   │   ├── adjustment_factor_manager.py
 │   │   ├── akshare_collector.py
 │   │   ├── baostock_collector.py
+│   │   ├── baostock_daily_downloader.py
 │   │   ├── check_table_schema.py
 │   │   ├── data_collector.py
 │   │   ├── data_manager.py
@@ -111,8 +184,9 @@ stock_database_v1/
 │   │   ├── enhanced_processor.py
 │   │   ├── import_csi_a50.py
 │   │   ├── integrated_pipeline.py
-│   │   ├── integrated_pipeline_fixed.py
+│   │   ├── integrated_pipeline.py.bak
 │   │   ├── pipeline_fix.py
+│   │   ├── robust_data_preparer.py
 │   │   ├── simple_storage.py
 │   │   ├── symbol_manager.py
 │   │   └── tushare_collector.py
@@ -129,35 +203,106 @@ stock_database_v1/
 │   │   ├── database_manager.py
 │   │   └── db_connector.py
 │   ├── downloaders
+│   ├── indicators
+│   │   ├── momentum
+│   │   │   ├── __init__.py
+│   │   │   ├── cci.py
+│   │   │   ├── rsi.py
+│   │   │   ├── stochastic.py
+│   │   │   └── williams_r.py
+│   │   ├── trend
+│   │   │   ├── __init__.py
+│   │   │   ├── ichimoku_cloud.py
+│   │   │   ├── macd.py
+│   │   │   ├── moving_average.py
+│   │   │   └── parabolic_sar.py
+│   │   ├── volatility
+│   │   │   ├── __init__.py
+│   │   │   └── bollinger_bands.py
+│   │   ├── volume
+│   │   │   ├── __init__.py
+│   │   │   └── obv.py
+│   │   ├── __init__.py
+│   │   ├── base_indicator.py
+│   │   ├── cache_manager.py
+│   │   ├── dependency_resolver.py
+│   │   ├── indicator_manager.py
+│   │   └── robust_base_indicator.py
+│   ├── monitoring
+│   │   ├── __init__.py
+│   │   ├── calculation_logger.py
+│   │   ├── indicator_validator.py
+│   │   ├── init.py
+│   │   └── performance_monitor.py
+│   ├── performance
+│   │   ├── __init__.py
+│   │   ├── cache_strategy.py
+│   │   ├── cache_strategy_fixed.py
+│   │   ├── memory_manager.py
+│   │   ├── memory_manager_fixed.py
+│   │   ├── parallel_calculator.py
+│   │   ├── parallel_calculator_fixed.py
+│   │   ├── performance_manager.py
+│   │   ├── performance_manager.py.backup
+│   │   └── test_performance_modules.py
 │   ├── processors
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── adjustor.py
+│   │   ├── quality_monitor.py
+│   │   └── validator.py
 │   ├── query
+│   │   ├── data
+│   │   │   └── exports
+│   │   │       └── test_export_sh600519.csv
 │   │   ├── __init__.py
 │   │   ├── analytics.py
+│   │   ├── data_pipeline.py
 │   │   ├── dynamic_query_engine.py
+│   │   ├── enhanced_query_engine.py
 │   │   ├── export.py
 │   │   ├── indicators.py
 │   │   ├── query_builder.py
 │   │   ├── query_engine.py
 │   │   ├── query_engine.py.backup
 │   │   ├── query_engine.py.backup_reserved
-│   │   └── query_engine.py.backup_standard
+│   │   ├── query_engine.py.backup_standard
+│   │   └── result_formatter.py
 │   ├── utils
 │   │   ├── __init__.py
 │   │   ├── code_converter.py
-│   │   └── logger.py
+│   │   ├── data_preparer.py
+│   │   ├── logger.py
+│   │   ├── stock_pool_loader.py
+│   │   ├── test_trade_date_manager.py
+│   │   └── trade_date_manager.py
 │   └── __init__.py
 ├── tests
 │   ├── data
+│   │   ├── cache
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── demo
+│   │   ├── __init__.py
+│   │   ├── demo_data_collector.py
 │   │   ├── demo_get_index_stock_a50.py
-│   │   └── demo_get_zza50_stock.py
+│   │   ├── demo_get_zza50_stock.py
+│   │   ├── P6-data_storage切def
+│   │   └── update_a50_components.py
 │   ├── docs
+│   ├── indicators
+│   │   ├── __init__.py
+│   │   ├── test_bollinger_bands.py
+│   │   ├── test_indicator_manager.py
+│   │   └── test_obv.py
 │   ├── integration
+│   ├── processors
+│   │   ├── __init__.py
+│   │   ├── test_adjustor.py
+│   │   └── test_validator.py
 │   ├── query
 │   │   ├── __init__.py
 │   │   ├── test_analytics.py
+│   │   ├── test_enhanced_query.py
 │   │   ├── test_export.py
 │   │   ├── test_indicators.py
 │   │   └── test_query_engine.py
@@ -171,21 +316,62 @@ stock_database_v1/
 │   ├── demo_database_password.py
 │   ├── demo_ths_index_stock.py
 │   ├── demo_黑板.py
+│   ├── test_mysql_connector.py
 │   ├── test_token_valid.py
 │   └── unitl_index_stock.py
 ├── .env
 ├── .gitignore
+├── benchmark_p6.py
+├── check_database_reality.py
+├── create_release_note.py
+├── diagnose_data_storage.py
+├── diagnose_storage.py
+├── fix_all_column_mappings.py
+├── fix_columns_simple.py
 ├── ice结构图.txt
 ├── import_a50.py
 ├── local_data_collector.py
 ├── main.py
+├── P5_COMPLETION_SUMMARY.md
+├── P6_IMPLEMENTATION_PLAN.md
+├── performance_test.py
+├── quick_check.py
+├── quick_root_test.py
 ├── quick_test.py
 ├── README.md
+├── RELEASE_v0.5.1.json
 ├── requirements.txt
 ├── run.py
+├── run_quality_tests.py
 ├── setup.py
+├── simple_db_query.py
+├── stock_database_P5_completed_.tar.gz
+├── stock_database_v0.5.1.zip
+├── storage_diagnostic_20251228_183727.txt
 ├── table_name_adapter.py
+├── test.zip
 ├── test_architecture_fix.py
+├── test_column_order.py
+├── test_direct_insert.py
 ├── test_enhanced_storage.py
+├── test_field_fix.py
+├── test_integration.py
+├── test_p6_basic.py
+├── test_p6_complete.py
+├── test_p6_fix.py
+├── test_p6_functional.py
+├── test_p6_step_by_step.py
+├── test_pipeline_simple.py
+├── test_quality_模块.py
+├── test_raw_data.py
+├── test_safe_storage.py
+├── test_safe_storage_v2.py
+├── test_simple.py
+├── test_sql_consistency.py
+├── test_storage_fixed.py
+├── test_storage_log.py
+├── test_write.py
 ├── tree_全配置.py
-└── update_a50_components.py
+├── ultimate_verification.py
+├── verify_data.py
+└── verify_data_persistence.py

@@ -4,11 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/14 8:38
 """
-desc 
-"""
-
-# test_architecture_fix.py
-"""
+desc
 测试架构修复
 """
 

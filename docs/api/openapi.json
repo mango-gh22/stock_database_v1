@@ -1,0 +1,818 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "股票技术指标计算API",
+    "version": "1.0.0",
+    "description": "股票技术指标计算API - 提供多种技术指标计算服务",
+    "contact": {
+      "name": "技术支持",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000",
+      "description": "本地开发服务器"
+    },
+    {
+      "url": "https://api.example.com",
+      "description": "生产服务器"
+    }
+  ],
+  "tags": [
+    {
+      "name": "indicators",
+      "description": "技术指标计算相关接口"
+    },
+    {
+      "name": "async",
+      "description": "异步计算相关接口"
+    },
+    {
+      "name": "system",
+      "description": "系统管理接口"
+    }
+  ],
+  "paths": {
+    "/openapi.json": {
+      "get": {
+        "tags": [
+          "general"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      },
+      "head": {
+        "tags": [
+          "general"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/docs": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      },
+      "head": {
+        "tags": [
+          "system"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/docs/oauth2-redirect": {
+      "get": {
+        "tags": [
+          "general"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      },
+      "head": {
+        "tags": [
+          "general"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/redoc": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      },
+      "head": {
+        "tags": [
+          "system"
+        ],
+        "summary": "",
+        "description": "",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "general"
+        ],
+        "summary": null,
+        "description": "API根目录",
+        "operationId": null,
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": null,
+        "description": "健康检查",
+        "operationId": null,
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/indicators/available": {
+      "get": {
+        "tags": [
+          "indicators"
+        ],
+        "summary": null,
+        "description": "获取所有可用指标\n\nReturns:\n    可用指标列表和信息",
+        "operationId": null,
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/indicators/calculate": {
+      "post": {
+        "tags": [
+          "indicators"
+        ],
+        "summary": null,
+        "description": "计算技术指标\n\nArgs:\n    request: 指标计算请求\n\nReturns:\n    包含技术指标的数据",
+        "operationId": null,
+        "responses": {
+          "200": {
+            "description": "指标计算结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/indicators/validate": {
+      "post": {
+        "tags": [
+          "indicators"
+        ],
+        "summary": null,
+        "description": "验证指标计算可行性\n\nArgs:\n    request: 验证请求\n\nReturns:\n    验证结果",
+        "operationId": null,
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/indicators/calculate/batch": {
+      "get": {
+        "tags": [
+          "indicators"
+        ],
+        "summary": null,
+        "description": "批量计算技术指标\n\nArgs:\n    symbols: 股票代码列表\n    indicators: 指标列表\n    start_date: 开始日期\n    end_date: 结束日期\n\nReturns:\n    批量计算结果",
+        "operationId": null,
+        "responses": {
+          "200": {
+            "description": "成功响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "500": {
+            "description": "服务器内部错误"
+          }
+        },
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "股票代码列表，用逗号分隔"
+          },
+          {
+            "name": "indicators",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "指标名称列表，用逗号分隔"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "IndicatorRequest": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "description": "股票代码，如：sh600519",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "indicators": {
+            "description": "指标名称列表",
+            "items": {
+              "type": "string"
+            },
+            "title": "Indicators",
+            "type": "array"
+          },
+          "start_date": {
+            "description": "开始日期，格式：YYYY-MM-DD",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "description": "结束日期，格式：YYYY-MM-DD",
+            "title": "End Date",
+            "type": "string"
+          },
+          "use_cache": {
+            "default": true,
+            "description": "是否使用缓存",
+            "title": "Use Cache",
+            "type": "boolean"
+          }
+        },
+        "description": "指标计算请求"
+      },
+      "AsyncTaskStatus": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "processing",
+              "completed",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "progress": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "IndicatorInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "requires_adjusted_price": {
+            "type": "boolean"
+          },
+          "min_data_points": {
+            "type": "integer"
+          }
+        }
+      },
+      "ValidationRequest": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "description": "股票代码",
+            "title": "Symbol",
+            "type": "string"
+          },
+          "indicator": {
+            "description": "指标名称",
+            "title": "Indicator",
+            "type": "string"
+          },
+          "start_date": {
+            "description": "开始日期",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "description": "结束日期",
+            "title": "End Date",
+            "type": "string"
+          }
+        },
+        "description": "验证请求"
+      },
+      "CalculationStatus": {
+        "type": "object",
+        "properties": {},
+        "description": "计算状态"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "完整文档",
+    "url": "https://github.com/yourusername/stock_database"
+  }
+}

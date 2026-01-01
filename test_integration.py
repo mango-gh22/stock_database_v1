@@ -4,18 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/14 19:30
 """
-desc 
-"""
-# _*_ coding: utf-8 _*_
-# File Path: E:/MyFile/stock_database_v1\test_integration.py
-# File Name: test_integration
-# @ Author: mango-gh22
-# @ Date：2025/12/14 19:30
-"""
-desc 
-"""
-# test_integration.py
-"""
+desc
 集成测试：验证块1和块2的集成 - 修复版本 v0.5.1-fix
 """
 

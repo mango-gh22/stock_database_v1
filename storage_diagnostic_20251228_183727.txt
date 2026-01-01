@@ -1,0 +1,32 @@
+============================================================
+数据存储问题诊断报告
+============================================================
+
+测试时间: 2025-12-28 18:37:27
+
+❌ 发现问题:
+  • 1. 直接数据库连接失败
+
+详细测试结果:
+----------------------------------------
+
+direct_connection:
+  name: DirectConnection
+  success: False
+  error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+
+project_connector:
+  name: ProjectConnector
+  success: True
+  row_count: 77458
+  autocommit_mode: Unknown
+
+table_structure:
+  error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+
+transaction_isolation:
+  error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+
+storage_workflow:
+  error: 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+  test_symbol: TEST_20251228_183725

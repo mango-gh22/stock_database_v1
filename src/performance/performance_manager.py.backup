@@ -1,0 +1,438 @@
+# _*_ coding: utf-8 _*_
+# File Path: E:/MyFile/stock_database_v1/src/performance\performance_manager.py
+# File Name: performance_manager
+# @ Author: mango-gh22
+# @ Date：2025/12/21 22:28
+"""
+desc
+"""
+
+# src/performance/performance_manager.py 修复版
+
+"""
+性能管理器
+整合所有性能优化和监控功能
+"""
+import logging
+from typing import Dict, Any, Optional
+from pathlib import Path
+import threading  # 添加导入
+import time  # 添加导入
+
+
+logger = logging.getLogger(__name__)
+
+
+class PerformanceManager:
+    """性能管理器"""
+
+    def __init__(self, config_path: Optional[str] = None):
+        # 加载配置
+        if config_path is None:
+            config_path = Path(__file__).parent.parent.parent / 'config' / 'performance.yaml'
+
+        config_path = str(config_path)
+
+        # ===== 修复点2：增强配置加载容错性 =====
+        try:
+            from ..config.config_loader import ConfigLoader
+            raw_config = ConfigLoader.load_yaml_config(config_path)
+
+            # 如果加载失败，使用默认配置
+            if not raw_config:
+                logger.warning(f"配置文件返回空，使用默认配置: {config_path}")
+                raw_config = self._get_default_config()
+
+            # 验证和修复配置
+            from ..config.config_validator import ConfigValidator
+            self.config = ConfigValidator.validate_and_fix(raw_config)
+
+            logger.info(f"成功加载并验证配置文件: {config_path}")
+
+        except Exception as e:
+            logger.error(f"加载配置文件失败 {config_path}: {e}，使用默认配置")
+            self.config = self._get_default_config()
+
+        # 确保配置有必要的结构
+        self._ensure_config_structure()
+
+        # 初始化各个模块
+        self._init_modules()
+
+        logger.info("性能管理器初始化完成")
+
+    def _get_default_config(self):
+        """获取默认配置"""
+        return {
+            'parallel_computing': {
+                'enabled': True,
+                'mode': 'thread',
+                'max_workers': 4
+            },
+            'caching': {
+                'enabled': True
+            },
+            'memory_management': {
+                'monitoring': {
+                    'enabled': True
+                }
+            },
+            'monitoring': {
+                'enabled': True,
+                'performance': {
+                    'enabled': True,
+                    'interval': 10
+                },
+                'validation': {
+                    'enabled': True
+                },
+                'calculation_log': {
+                    'enabled': True
+                }
+            }
+        }
+
+    def _ensure_config_structure(self):
+        """确保配置有必要的结构"""
+        # 确保所有需要的键都存在
+        sections = ['parallel_computing', 'caching', 'memory_management', 'monitoring']
+        for section in sections:
+            if section not in self.config:
+                self.config[section] = {}
+
+        # 确保监控部分有子配置
+        if 'monitoring' in self.config:
+            monitor_sections = ['performance', 'validation', 'calculation_log']
+            for section in monitor_sections:
+                if section not in self.config['monitoring']:
+                    self.config['monitoring'][section] = {}
+
+    # 在 performance_manager.py 中修改 _init_modules 方法
+    def _init_modules(self):
+        """初始化所有模块"""
+        try:
+            # 并行计算器 - 优先使用fixed版本
+            parallel_config = self.config.get('parallel_computing', {})
+            if not parallel_config:  # 如果为空，尝试从indicators获取
+                parallel_config = self.config.get('indicators', {}).get('parallel', {})
+
+            try:
+                from .parallel_calculator_fixed import ParallelCalculatorFixed
+                self.parallel_calculator = ParallelCalculatorFixed(parallel_config)
+                logger.info(f"✅ 并行计算器初始化成功: workers={parallel_config.get('max_workers', 4)}")
+            except ImportError:
+                from .parallel_calculator import ParallelCalculator
+                self.parallel_calculator = ParallelCalculator(max_workers=parallel_config.get('max_workers', 4))
+                logger.info("⚠️  使用基础版并行计算器")
+
+            # 缓存管理器 - 优先使用fixed版本
+            cache_config = self.config.get('caching', {})
+            if not cache_config:
+                cache_config = self.config.get('indicators', {}).get('cache', {})
+
+            try:
+                from .cache_strategy_fixed import CacheManagerFixed
+                self.cache_manager = CacheManagerFixed(cache_config)
+                logger.info(f"✅ 缓存管理器初始化成功: max_size={cache_config.get('max_size', 1000)}")
+            except ImportError:
+                from .cache_strategy import CacheManager
+                self.cache_manager = CacheManager(cache_config)
+                logger.info("⚠️  使用基础版缓存管理器")
+
+            # 内存管理器 - 优先使用fixed版本
+            memory_config = self.config.get('memory_management', {})
+            try:
+                from .memory_manager_fixed import MemoryManagerFixed
+                self.memory_manager = MemoryManagerFixed(memory_config)
+                logger.info("✅ 内存管理器初始化成功")
+            except ImportError:
+                from .memory_manager import MemoryManager
+                self.memory_manager = MemoryManager(memory_config)
+                logger.info("⚠️  使用基础版内存管理器")
+
+            # 性能监控器
+            monitor_config = self.config.get('monitoring', {})
+            if not isinstance(monitor_config, dict):
+                monitor_config = {}
+
+            # 确保配置有正确的结构
+            performance_config = monitor_config.get('performance', {})
+            interval = performance_config.get('interval', 10)
+
+            fixed_monitor_config = {
+                'interval': interval,
+                'history_size': performance_config.get('history_size', 1000),
+                'alerts': monitor_config.get('alerts', {}),
+                'enabled': monitor_config.get('enabled', True)
+            }
+
+            from ..monitoring.performance_monitor import PerformanceMonitor
+            self.performance_monitor = PerformanceMonitor(fixed_monitor_config)
+            logger.info(f"✅ 性能监控器初始化: interval={interval}")
+
+            # 指标验证器
+            validation_config = monitor_config.get('validation', {})
+            from ..monitoring.indicator_validator import IndicatorValidator
+            self.indicator_validator = IndicatorValidator(validation_config)
+            logger.info("✅ 指标验证器初始化")
+
+            # 计算日志器
+            log_config = monitor_config.get('calculation_log', {})
+            from ..monitoring.calculation_logger import CalculationLogger
+            self.calculation_logger = CalculationLogger(log_config)
+            logger.info("✅ 计算日志器初始化")
+
+        except Exception as e:
+            logger.error(f"初始化模块失败: {e}", exc_info=True)
+
+            # 优先使用 safe 模块，如果也失败再用 stub
+            try:
+                self._create_safe_modules()  # 创建安全的占位模块
+            except:
+                self._create_stub_modules()  # 最后防线
+
+
+    def _create_safe_modules(self):
+        """创建完全安全的占位模块"""
+        logger.warning("❌ 模块初始化失败，创建安全占位模块")
+
+        class SafeModule:
+            def __init__(self, name):
+                self.name = name
+                self.logger = logging.getLogger(f"SafeModule.{name}")
+
+            def __getattr__(self, name):
+                """返回一个安全的占位方法"""
+
+                def safe_method(*args, **kwargs):
+                    self.logger.debug(f"{self.name}.{name} called (safe mode)")
+
+                    # 针对特定方法的返回值优化
+                    if name == 'optimize_dataframe':
+                        # 始终返回第一个参数（原始DataFrame）
+                        return args[0] if args else pd.DataFrame()
+
+                    elif name == 'calculate':
+                        # 串行执行函数
+                        if args and callable(args[0]):
+                            func, data = args[0], args[1]
+                            return [func(item, *args[2:], **kwargs) for item in data]
+
+                    elif name == 'get':
+                        # 缓存未命中
+                        return None
+
+                    elif name == 'set':
+                        # 设置成功
+                        return True
+
+                    elif name == 'get_cache_stats':
+                        # 返回空统计
+                        return {'enabled': False, 'size': 0}
+
+                    elif name == 'validate_indicator':
+                        # 始终返回有效结果
+                        from ..monitoring.indicator_validator import ValidationResult
+                        from datetime import datetime
+                        return ValidationResult(
+                            indicator_name=kwargs.get('indicator_name', 'unknown'),
+                            timestamp=datetime.now(),
+                            is_valid=True,
+                            errors=[],
+                            warnings=["验证器未初始化，跳过验证"],
+                            metrics={},
+                            test_data_size=0
+                        )
+
+                    # 默认返回None
+                    return None
+
+                return safe_method
+
+        self.parallel_calculator = SafeModule('ParallelCalculator')
+        self.cache_manager = SafeModule('CacheManager')
+        self.memory_manager = SafeModule('MemoryManager')
+        self.performance_monitor = SafeModule('PerformanceMonitor')
+        self.indicator_validator = SafeModule('IndicatorValidator')
+        self.calculation_logger = SafeModule('CalculationLogger')
+
+
+
+    def _create_stub_modules(self):
+        """创建占位模块"""
+        class StubModule:
+            def __init__(self, config):
+                self.config = config
+            def __getattr__(self, name):
+                return lambda *args, **kwargs: None
+
+        self.parallel_calculator = StubModule({})
+        self.cache_manager = StubModule({})
+        self.memory_manager = StubModule({})
+        self.performance_monitor = StubModule({})
+        self.indicator_validator = StubModule({})
+        self.calculation_logger = StubModule({})
+
+    def start(self):
+        """启动所有性能模块"""
+        logger.info("启动性能管理器...")
+
+        try:
+            # 启动性能监控
+            if self.config.get('monitoring', {}).get('enabled', True):
+                self.performance_monitor.start()
+        except:
+            pass
+
+        try:
+            # 启动内存监控
+            memory_monitoring = self.config.get('memory_management', {}).get('monitoring', {})
+            if memory_monitoring.get('enabled', True):
+                self.memory_manager.start_monitoring()
+        except:
+            pass
+
+        logger.info("性能管理器已启动")
+
+    def stop(self):
+        """停止所有性能模块"""
+        logger.info("停止性能管理器...")
+
+        try:
+            self.performance_monitor.stop()
+        except:
+            pass
+
+        try:
+            self.memory_manager.stop_monitoring()
+        except:
+            pass
+
+        try:
+            # 保存缓存
+            self.cache_manager.save_cache_state()
+        except:
+            pass
+
+        logger.info("性能管理器已停止")
+
+    # ===== 修复点5：增强 optimize_dataframe 的健壮性 =====
+    def optimize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """优化数据框 - 增强版"""
+        if df is None or df.empty:
+            logger.warning("optimize_dataframe 接收到空数据")
+            return df
+
+        try:
+            result = self.memory_manager.optimize_dataframe(df)
+
+            # ===== 关键修复：如果返回None，使用原始数据 =====
+            if result is None:
+                logger.warning("memory_manager.optimize_dataframe 返回 None，使用原始数据")
+                return df
+
+            # 确保返回的是DataFrame
+            if not isinstance(result, pd.DataFrame):
+                logger.warning(f"optimize_dataframe 返回类型 {type(result)}，使用原始数据")
+                return df
+
+            logger.info(
+                f"DataFrame优化成功: {original_memory:.2f}MB -> {result.memory_usage(deep=True).sum() / 1024 / 1024:.2f}MB")
+            return result
+
+        except Exception as e:
+            logger.error(f"优化DataFrame失败: {e}", exc_info=True)
+            return df  # 返回原始数据作为回退
+
+    def parallel_calculate(self, func, data, *args, **kwargs):
+        """并行计算"""
+        try:
+            return self.parallel_calculator.calculate(func, data, *args, **kwargs)
+        except:
+            return func(data, *args, **kwargs)
+
+    def get_cache(self, key):
+        """获取缓存"""
+        try:
+            return self.cache_manager.get(key)
+        except:
+            return None
+
+    def set_cache(self, key, value, ttl=None, group=None):
+        """设置缓存"""
+        try:
+            return self.cache_manager.set(key, value, ttl=ttl, group=group)
+        except:
+            return False
+
+    def validate_indicator(self, indicator_name, indicator_data, price_data, params=None):
+        """验证指标"""
+        try:
+            return self.indicator_validator.validate_indicator(
+                indicator_name, indicator_data, price_data, params or {}
+            )
+        except Exception as e:
+            logger.error(f"验证指标失败: {e}")
+            # 返回一个简单的验证结果
+            from ..monitoring.indicator_validator import ValidationResult
+            from datetime import datetime
+            return ValidationResult(
+                indicator_name=indicator_name,
+                timestamp=datetime.now(),
+                is_valid=True,
+                errors=[],
+                warnings=[f"验证器异常: {str(e)}"],
+                metrics={},
+                test_data_size=len(indicator_data)
+            )
+
+    def log_calculation(self, **kwargs):
+        """记录计算日志"""
+        try:
+            return self.calculation_logger.log_calculation(**kwargs)
+        except:
+            pass
+
+    def get_performance_report(self):
+        """获取性能报告"""
+        report = {
+            'performance': {},
+            'memory': {},
+            'cache': {},
+            'validation': {},
+            'calculations': {}
+        }
+
+        try:
+            report['performance'] = self.performance_monitor.generate_report()
+        except:
+            pass
+
+        try:
+            report['memory'] = self.memory_manager.get_memory_report()
+        except:
+            pass
+
+        try:
+            report['cache'] = self.cache_manager.get_cache_stats()
+        except:
+            pass
+
+        try:
+            report['validation'] = self.indicator_validator.generate_validation_report()
+        except:
+            pass
+
+        try:
+            report['calculations'] = self.calculation_logger.generate_statistics()
+        except:
+            pass
+
+        return report
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()

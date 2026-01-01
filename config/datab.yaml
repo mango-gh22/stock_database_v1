@@ -3,7 +3,7 @@ database:
     host: "localhost"
     port: 3306
     user: "stock_user" # 后续P2阶段我们将创建这个用户
-    password: "root1234" # 使用您提供的密码,已经作废，可以从系统变量DB_PASSWORD或.env中同名获取
+    password: "root1234" # 密码已经作废，可以从系统变量DB_PASSWORD或.env中同名获取实际密码
     database: "stock_database" # 后续创建
     charset: "utf8mb4"
   backup:

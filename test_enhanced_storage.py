@@ -7,7 +7,6 @@
 desc 测试函数
 """
 
-
 def test_enhanced_storage():
     """测试增强版数据存储器"""
 

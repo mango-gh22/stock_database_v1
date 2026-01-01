@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()  # 加载 .env 文件
 
 def get_db_password():
-    return os.getenv('DB_PASSWORD') # 从环境变量读取
+    return os.getenv('DB_PASSWORD')  # 从环境变量读取
 
 def get_tushare_token():
     return os.getenv('TUSHARE_TOKEN')

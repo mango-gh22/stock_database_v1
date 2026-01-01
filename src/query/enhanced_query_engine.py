@@ -4,37 +4,47 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/20 19:20
 """
-desc 扩展查询引擎支持技术指标
-"""
-
-"""
 增强版查询引擎 - 支持技术指标计算
 """
-import pandas as pd
-from typing import List, Dict, Optional
+
 import logging
+from typing import Dict, List, Optional, Union, Any
+import pandas as pd
+from datetime import datetime
+import json
 
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent.parent))  # 添加项目根
-from src.query.query_engine import QueryEngine
-from src.indicators.indicator_manager import IndicatorManager
-
+# 设置日志
 logger = logging.getLogger(__name__)
 
 
-class EnhancedQueryEngine(QueryEngine):
-    """增强版查询引擎 - 支持技术指标"""
+class EnhancedQueryEngine:
+    """增强查询引擎，支持技术指标计算"""
 
-    def __init__(self, config_path: str = 'config/database.yaml'):
+    def __init__(self, query_engine=None):
         """
         初始化增强查询引擎
 
         Args:
-            config_path: 配置文件路径
+            query_engine: 可选的查询引擎实例，用于测试时注入模拟对象
         """
-        super().__init__(config_path)
-        self.indicator_manager = IndicatorManager(config_path)
+        # 延迟导入以避免循环依赖
+        if query_engine is None:
+            from src.database.query_engine import QueryEngine
+            self.query_engine = QueryEngine()
+        else:
+            self.query_engine = query_engine
+
+        from src.indicators.indicator_manager import IndicatorManager
+        from src.query.data_pipeline import DataPipeline
+        from src.query.result_formatter import ResultFormatter
+
+        self.indicator_manager = IndicatorManager()
+        self.data_pipeline = DataPipeline()
+        self.result_formatter = ResultFormatter()
+
+        # 初始化缓存
+        self.cache = {}
+        self.cache_enabled = True
 
     def query_with_indicators(self, symbol: str,
                               indicators: List[str],
@@ -66,19 +76,35 @@ class EnhancedQueryEngine(QueryEngine):
 
         if not indicators:
             logger.warning("没有有效的指标，返回原始数据")
-            return self.query_daily_data(symbol, start_date, end_date)
+            return self.query_engine.query_daily_data(symbol, start_date, end_date)
 
         # 获取基础数据
-        df = self.query_daily_data(symbol, start_date, end_date)
+        df = self.query_engine.query_daily_data(symbol, start_date, end_date)
 
         if df.empty:
             logger.warning(f"股票 {symbol} 在指定日期范围内无数据")
             return df
 
-        # 计算技术指标
-        indicator_results = self.indicator_manager.calculate_for_symbol(
-            symbol, indicators, start_date, end_date, use_cache
-        )
+        # 在计算指标之前添加调试日志
+        logger.debug(f"准备计算指标: {indicators}")
+        logger.debug(f"使用缓存: {use_cache}")
+
+        # 计算技术指标 - 使用关键字参数明确传递
+        try:
+            indicator_results = self.indicator_manager.calculate_for_symbol(
+                symbol=symbol,
+                indicator_names=indicators,
+                start_date=start_date,
+                end_date=end_date,
+                indicator_params={},
+                use_cache=use_cache
+            )
+            logger.debug(f"指标计算结果: {len(indicator_results)} 个")
+        except Exception as e:
+            logger.error(f"计算指标失败: {e}")
+            import traceback
+            logger.error(f"详细错误: {traceback.format_exc()}")
+            indicator_results = {}
 
         if not indicator_results:
             logger.warning("技术指标计算失败，返回原始数据")
@@ -138,7 +164,7 @@ class EnhancedQueryEngine(QueryEngine):
             return result
 
         # 获取数据
-        df = self.query_daily_data(symbol, start_date, end_date)
+        df = self.query_engine.query_daily_data(symbol, start_date, end_date)
         if df.empty:
             result['message'] = f"股票 {symbol} 在指定日期范围内无数据"
             return result
@@ -155,3 +181,4 @@ class EnhancedQueryEngine(QueryEngine):
         result['message'] = "可以计算该指标"
 
         return result
+

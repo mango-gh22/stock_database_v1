@@ -4,11 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/10 22:03
 """
-desc 
-"""
-# scripts/update_table_schema.py
-"""
-更新数据库表结构，添加缺失的列
+desc 更新数据库表结构，添加缺失的列
 """
 
 from src.database.db_connector import DatabaseConnector

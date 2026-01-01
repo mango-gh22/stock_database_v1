@@ -6,6 +6,7 @@
 desc
 增强的技术指标基类 - 集成数据兼容性
 """
+
 from abc import ABC, abstractmethod
 import pandas as pd
 from typing import Dict, List, Optional, Any

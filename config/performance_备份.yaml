@@ -1,0 +1,397 @@
+# File: config/performance.yaml
+# Desc: 股票数据库性能优化与监控配置
+
+# 技术指标配置
+indicators:
+  # 缓存配置
+  cache:
+    enabled: true
+    max_size: 1000
+    ttl: 3600
+    strategy: "lru"  # lru, lfu, fifo
+    compress: true
+    compression_level: 6
+
+  # 并行计算配置
+  parallel:
+    enabled: true
+    max_workers: 4
+    timeout: 300
+    mode: "thread"  # thread, process, async
+    batch_size: 50
+    chunk_size: 100
+
+    # 自适应策略
+    adaptive:
+      enabled: true
+      min_workers: 1
+      max_workers: 8
+      target_load: 0.7  # 目标CPU负载率
+
+    # 任务调度
+    scheduler:
+      priority_enabled: true
+      retry_on_failure: true
+      max_retries: 3
+      retry_delay: 5
+
+# 监控配置
+monitoring:
+  # 基础配置
+  enabled: true
+  collect_interval: 60  # 收集间隔（秒）
+  metrics_port: 9090
+  log_level: "INFO"
+
+  # 性能监控
+  performance:
+    enabled: true
+    interval: 10  # 性能数据收集间隔
+    history_size: 1000  # 历史记录大小
+
+    # 监控指标
+    metrics:
+      - "cpu_usage"
+      - "memory_usage"
+      - "disk_io"
+      - "network_io"
+      - "cache_hit_rate"
+      - "query_latency"
+
+    # 警报阈值
+    alerts:
+      enabled: true
+      channels: ["log", "file"]
+
+      thresholds:
+        cpu_usage: 90      # CPU使用率超过90%报警
+        memory_usage: 85   # 内存使用率超过85%报警
+        disk_usage: 80     # 磁盘使用率超过80%报警
+        query_timeout: 30  # 查询超时30秒报警
+
+      alert_log_file: "logs/performance_alerts.log"
+
+  # 指标验证
+  validation:
+    enabled: true
+    validate_on_calc: true    # 计算时验证
+    validate_on_query: true   # 查询时验证
+    tolerance: 0.001         # 容差
+    max_history: 100         # 最大历史记录
+
+    # 验证规则
+    rules:
+      check_nan: true
+      check_inf: true
+      check_range: true
+      check_consistency: true
+
+  # 计算日志
+  calculation_log:
+    enabled: true
+    log_level: "DEBUG"
+    log_queries: true
+    log_results: false      # 注意：记录结果可能包含大量数据
+    log_performance: true
+    log_cache: true
+
+    # 日志文件配置
+    log_dir: "logs/calculations"
+    max_log_size: 100       # MB
+    rotation_size: 10       # MB
+    compression: true
+    retention_days: 30
+
+    # 缓冲区配置
+    buffer_size: 100
+    flush_interval: 60      # 秒
+
+# 查询配置
+query:
+  batch_size: 100
+  compression: true
+  prefetch: true
+
+  # 查询优化
+  optimization:
+    enabled: true
+    use_cache: true
+    parallel_execution: true
+    result_caching: true
+
+  # 超时设置
+  timeout:
+    default: 30             # 默认超时（秒）
+    complex_query: 120      # 复杂查询超时
+    batch_query: 300        # 批量查询超时
+
+  # 结果处理
+  result:
+    max_rows: 10000         # 最大返回行数
+    chunked_return: true    # 分块返回
+    chunk_size: 1000
+
+# 并行计算配置（详细版）
+parallel_computing:
+  enabled: true
+  mode: "thread"           # thread, process, async
+  max_workers: 4
+  timeout: 300
+
+  # 批量处理
+  batch_size: 10
+  chunk_size: 1000         # 数据分块大小
+
+  # 策略选择
+  strategy:
+    data_threshold: 1000   # 数据量阈值，超过此值使用并行
+    complexity_threshold: "medium"  # low, medium, high
+    auto_adjust: true
+    min_workers: 1
+    max_workers: 8
+    adaptive: true
+
+  # 任务队列
+  task_queue:
+    max_size: 1000
+    priority_levels: 3     # 优先级级别
+
+  # 容错处理
+  fault_tolerance:
+    retry_on_failure: true
+    max_retries: 3
+    fallback_strategy: "sequential"  # 失败后降级为顺序执行
+
+# 缓存配置（详细版）
+caching:
+  enabled: true
+  multi_level: true
+  cache_root: "data/cache/performance"
+
+  # 内存缓存 (L1)
+  memory_cache:
+    enabled: true
+    strategy: "lru"        # lru, lfu, fifo, random
+    max_size: 100          # MB
+    default_ttl: 3600      # 秒
+    max_items: 1000
+    cleanup_interval: 60   # 清理间隔（秒）
+
+    # 统计信息
+    statistics:
+      enabled: true
+      collect_interval: 300
+
+  # 磁盘缓存 (L2)
+  disk_cache:
+    enabled: true
+    strategy: "lfu"
+    max_size: 1000         # MB
+    cache_dir: "data/cache/disk"
+    compression: true
+    compression_level: 6
+    serialization: "pickle"  # pickle, json, msgpack
+
+    # 文件管理
+    file_management:
+      max_files: 10000
+      cleanup_ratio: 0.2   # 清理比例
+
+  # Redis缓存 (L3 - 可选)
+  redis_cache:
+    enabled: false
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: ""
+    max_connections: 10
+
+  # 缓存组配置
+  groups:
+    indicators:
+      ttl: 3600           # 技术指标缓存时间
+      priority: "high"
+
+    price_data:
+      ttl: 86400          # 价格数据缓存24小时
+      priority: "medium"
+
+    query_results:
+      ttl: 1800           # 查询结果缓存30分钟
+      priority: "low"
+
+# 内存管理配置
+memory_management:
+  # 监控配置
+  monitoring:
+    enabled: true
+    interval: 5           # 监控间隔（秒）
+    history_size: 1000
+
+  # 内存阈值（百分比）
+  thresholds:
+    low: 60
+    medium: 80
+    high: 90
+    critical: 95
+
+  # 优化策略
+  optimization:
+    auto_optimize: true
+    df_optimization: true    # DataFrame优化
+    array_compression: true  # 数组压缩
+    cleanup_interval: 300    # 清理间隔（秒）
+
+    # DataFrame优化选项
+    dataframe:
+      downcast_integers: true
+      downcast_floats: true
+      use_category: true     # 对低基数文本使用category类型
+
+  # 泄漏检测
+  leak_detection:
+    enabled: false
+    interval: 60            # 检测间隔（秒）
+    threshold_mb: 10        # 泄漏阈值（MB）
+
+  # 垃圾回收
+  garbage_collection:
+    enabled: true
+    threshold: 0.7          # 内存使用率阈值
+    aggressive_mode: false
+
+# 数据库连接池配置
+database:
+  connection_pool:
+    enabled: true
+    max_connections: 20
+    min_connections: 5
+    max_idle_time: 300      # 最大空闲时间（秒）
+
+  # 查询优化
+  query_optimization:
+    explain_queries: false   # 解释查询计划
+    slow_query_threshold: 1.0  # 慢查询阈值（秒）
+    log_slow_queries: true
+
+  # 预编译语句
+  prepared_statements:
+    enabled: true
+    cache_size: 100
+
+# 网络配置
+network:
+  # HTTP服务器配置
+  http:
+    enabled: true
+    port: 8080
+    max_connections: 100
+    timeout: 30
+
+  # WebSocket配置
+  websocket:
+    enabled: false
+    port: 8081
+    max_connections: 50
+
+  # 限流配置
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    burst_size: 10
+
+# 系统配置
+system:
+  # 线程池配置
+  thread_pool:
+    core_size: 4
+    max_size: 8
+    queue_size: 100
+    keep_alive_time: 60
+
+  # 进程池配置
+  process_pool:
+    enabled: false
+    max_workers: 4
+
+  # 异步配置
+  async:
+    enabled: true
+    max_concurrent: 100
+
+  # 文件系统监控
+  filesystem:
+    watch_changes: true
+    poll_interval: 5
+
+# 调试和开发配置
+debug:
+  # 性能分析
+  profiling:
+    enabled: false
+    output_dir: "logs/profiles"
+    sample_interval: 0.01   # 采样间隔（秒）
+
+  # 跟踪
+  tracing:
+    enabled: false
+    trace_queries: true
+    trace_calculations: true
+
+  # 日志详细程度
+  verbose:
+    queries: false
+    cache: false
+    memory: false
+    performance: false
+
+# 环境特定配置
+environments:
+  development:
+    monitoring:
+      enabled: true
+      log_level: "DEBUG"
+
+    debug:
+      enabled: true
+
+    cache:
+      memory_cache:
+        max_size: 50
+
+  production:
+    monitoring:
+      enabled: true
+      log_level: "INFO"
+
+    debug:
+      enabled: false
+
+    cache:
+      memory_cache:
+        max_size: 200
+
+    database:
+      connection_pool:
+        max_connections: 50
+
+# 性能测试配置
+performance_test:
+  enabled: false
+  test_cases:
+    - name: "indicator_calculation"
+      workers: [1, 2, 4, 8]
+      data_sizes: [100, 1000, 10000]
+
+    - name: "query_performance"
+      concurrent_queries: [1, 10, 50, 100]
+      result_sizes: [100, 1000, 10000]
+
+  # 报告生成
+  reporting:
+    output_dir: "reports/performance"
+    format: ["html", "json"]
+    compare_with_baseline: true
+
+
+

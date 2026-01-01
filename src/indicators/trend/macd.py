@@ -4,16 +4,12 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/20 19:20
 """
-desc 
-"""
-
-"""
-MACD指标（指数平滑异同移动平均线）
-用于判断股票价格趋势的强度和方向
+File: src/indicators/trend/macd.py (修复)
+Desc: MACD指标 - 修复参数验证问题
 """
 import pandas as pd
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List
 from ..base_indicator import BaseIndicator, IndicatorType
 import logging
 
@@ -23,10 +19,20 @@ logger = logging.getLogger(__name__)
 class MACD(BaseIndicator):
     """MACD指标"""
 
-    def __init__(self, fast_period: int = 12,
-                 slow_period: int = 26,
-                 signal_period: int = 9,
-                 price_column: str = 'close_price'):
+    # 类属性
+    name = "macd"
+    indicator_type = IndicatorType.TREND
+    description = "指数平滑异同移动平均线(MACD)"
+
+    # 默认参数
+    default_parameters = {
+        'fast_period': 12,
+        'slow_period': 26,
+        'signal_period': 9,
+        'price_column': 'close_price'
+    }
+
+    def __init__(self, **parameters):
         """
         初始化MACD指标
 
@@ -36,23 +42,18 @@ class MACD(BaseIndicator):
             signal_period: 信号线周期，默认9
             price_column: 价格列名
         """
-        super().__init__("macd", IndicatorType.TREND)
+        # 合并默认参数和用户参数
+        merged_params = {**self.default_parameters, **parameters}
+        super().__init__(**merged_params)
 
-        self.fast_period = fast_period
-        self.slow_period = slow_period
-        self.signal_period = signal_period
-        self.price_column = price_column
+        # 解包参数
+        self.fast_period = self.parameters['fast_period']
+        self.slow_period = self.parameters['slow_period']
+        self.signal_period = self.parameters['signal_period']
+        self.price_column = self.parameters['price_column']
         self.requires_adjusted_price = True
-        self.min_data_points = slow_period + signal_period + 10
-        self.description = "MACD指标，包括DIF、DEA和MACD柱状图"
-
-        # 设置参数
-        self.parameters = {
-            'fast_period': fast_period,
-            'slow_period': slow_period,
-            'signal_period': signal_period,
-            'price_column': price_column
-        }
+        self.min_data_points = self.slow_period + self.signal_period + 10
+        self.description = f"MACD指标，快线: {self.fast_period}，慢线: {self.slow_period}，信号: {self.signal_period}"
 
     def calculate(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -64,8 +65,7 @@ class MACD(BaseIndicator):
         Returns:
             包含MACD指标的DataFrame
         """
-        logger.info(
-            f"计算MACD指标，快线周期: {self.fast_period}, 慢线周期: {self.slow_period}, 信号周期: {self.signal_period}")
+        logger.info(f"计算MACD指标，快线: {self.fast_period}, 慢线: {self.slow_period}, 信号: {self.signal_period}")
 
         # 准备数据
         df = self.prepare_data(df)
@@ -90,7 +90,7 @@ class MACD(BaseIndicator):
         dea = dif.ewm(span=self.signal_period, adjust=False).mean()
         result_df['MACD_DEA'] = dea
 
-        # 计算MACD柱状图（histogram）
+        # 计算MACD柱状图
         histogram = (dif - dea) * 2
         result_df['MACD_HIST'] = histogram
 
@@ -109,27 +109,30 @@ class MACD(BaseIndicator):
         df['MACD_DEATH_CROSS'] = (df['MACD_DIF'] < df['MACD_DEA']) & \
                                  (df['MACD_DIF'].shift(1) >= df['MACD_DEA'].shift(1))
 
-        # MACD背离检测（需要更多数据，这里简单实现）
-        if len(df) > 30:
-            # 价格创新高但MACD未创新高（顶背离）
-            df['MACD_TOP_DIVERGENCE'] = False
+        # 柱状图变化信号
+        hist_diff = df['MACD_HIST'].diff()
+        df['MACD_HIST_TURNING_UP'] = (hist_diff > 0) & (hist_diff.shift(1) <= 0)
+        df['MACD_HIST_TURNING_DOWN'] = (hist_diff < 0) & (hist_diff.shift(1) >= 0)
 
-            # 价格创新低但MACD未创新低（底背离）
-            df['MACD_BOTTOM_DIVERGENCE'] = False
+        # 零轴信号
+        df['MACD_DIF_ABOVE_ZERO'] = df['MACD_DIF'] > 0
+        df['MACD_DIF_BELOW_ZERO'] = df['MACD_DIF'] < 0
+        df['MACD_DIF_CROSS_ZERO_UP'] = (df['MACD_DIF'] > 0) & (df['MACD_DIF'].shift(1) <= 0)
+        df['MACD_DIF_CROSS_ZERO_DOWN'] = (df['MACD_DIF'] < 0) & (df['MACD_DIF'].shift(1) >= 0)
 
     def validate_parameters(self) -> bool:
         """验证参数有效性"""
-        if not all(isinstance(p, int) and p > 0 for p in
-                   [self.fast_period, self.slow_period, self.signal_period]):
+        # 通过 self.parameters 访问参数
+        fast_period = self.parameters.get('fast_period')
+        slow_period = self.parameters.get('slow_period')
+        signal_period = self.parameters.get('signal_period')
+
+        if not all(isinstance(p, int) and p > 0 for p in [fast_period, slow_period, signal_period]):
             logger.error("MACD周期参数必须是正整数")
             return False
 
-        if self.fast_period >= self.slow_period:
+        if fast_period >= slow_period:
             logger.error("快速EMA周期必须小于慢速EMA周期")
-            return False
-
-        if self.signal_period <= 0:
-            logger.error("信号线周期必须大于0")
             return False
 
         return True
@@ -140,5 +143,10 @@ class MACD(BaseIndicator):
 
     def get_output_columns(self) -> List[str]:
         """获取输出列名"""
-        return ['MACD_DIF', 'MACD_DEA', 'MACD_HIST',
-                'MACD_GOLDEN_CROSS', 'MACD_DEATH_CROSS']
+        return [
+            'MACD_DIF', 'MACD_DEA', 'MACD_HIST',
+            'MACD_GOLDEN_CROSS', 'MACD_DEATH_CROSS',
+            'MACD_HIST_TURNING_UP', 'MACD_HIST_TURNING_DOWN',
+            'MACD_DIF_ABOVE_ZERO', 'MACD_DIF_BELOW_ZERO',
+            'MACD_DIF_CROSS_ZERO_UP', 'MACD_DIF_CROSS_ZERO_DOWN'
+        ]

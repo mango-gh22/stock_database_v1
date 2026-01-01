@@ -2,24 +2,30 @@
 # File Path: E:/MyFile/stock_database_v1/scripts\update_a50_components.py
 # File Name: update_a50_components
 # @ Author: mango-gh22
-# @ Date：2025/12/13 16:16
+# @ Date：2025/12/27 15:43
 """
-desc 
-"""
-# !/usr/bin/env python3
-"""
-中证A50成分股自动更新脚本
-无需依赖易变的Tushare接口，使用官方数据
+desc
+中证A50成分股自动更新脚本（路径修正版）
+- 适用于脚本位于 scripts/ 子目录
+- 自动定位项目根目录（scripts/ 的上一级）
+- 优先使用内置官方数据（2024-12-16），Tushare 作为可选尝试
+
+🔔 重要提醒：请在 2025年6月 和 2025年12月
+    关注中证指数公司官网（www.csindex.com.cn）是否发布新的 A50 成分股调整公告，
+    并手动更新 OFFICIAL_A50_COMPONENTS
 """
 
 import os
 import sys
 from pathlib import Path
+from datetime import datetime
 from dotenv import load_dotenv
 import tushare as ts
 import yaml
+import pandas as pd
 
-# ✅ 2024年12月16日官方50只成分股（100%可靠）
+# ✅ 2024年12月16日中证A50官方成分股（来源：中证指数有限公司）
+# ⚠️ 注意：中证A50每半年调整一次，请在每年1月/7月检查是否需更新此列表！
 OFFICIAL_A50_COMPONENTS = [
     {"symbol": "600519.SH", "name": "贵州茅台", "weight": 10.38},
     {"symbol": "300750.SZ", "name": "宁德时代", "weight": 8.45},
@@ -79,67 +85,56 @@ OFFICIAL_A50_COMPONENTS = [
 
 
 class CSI_A50_Updater:
-    """中证A50更新器"""
-
     def __init__(self):
-        self.project_root = Path(__file__).parent
+        # ✅ 关键修正：定位到项目根目录（scripts/ 的上一级）
+        self.project_root = Path(__file__).parent.parent
         self.yaml_path = self.project_root / 'config' / 'symbols.yaml'
 
     def load_env_token(self):
-        """加载.env中的token"""
         env_path = self.project_root / '.env'
         if not env_path.exists():
-            raise FileNotFoundError(f"❌ 找不到.env文件: {env_path}")
-
+            raise FileNotFoundError(f"❌ 找不到 .env 文件: {env_path}")
         load_dotenv(dotenv_path=env_path)
         token = os.getenv('TUSHARE_TOKEN')
-
         if not token or len(token) < 20:
-            raise ValueError("❌ .env中TUSHARE_TOKEN无效")
-
+            raise ValueError("❌ .env 中 TUSHARE_TOKEN 无效或缺失")
         return token
 
     def try_tushare(self):
-        """尝试从Tushare获取（可选）"""
+        """尝试从 Tushare 获取成分股（注意：通常无权重）"""
         try:
             token = self.load_env_token()
             pro = ts.pro_api(token)
+            # 测试连接
+            pro.query('stock_basic', limit=1)
+            print("✅ Tushare 连接正常")
 
-            # 先测试基础接口
-            df_test = pro.query('stock_basic', exchange='', list_status='L', limit=1)
-            if not df_test.empty:
-                print("✅ Tushare连接正常")
-
-                # 尝试获取指数成分股
-                df = pro.query('index_member', index_code='930050.CSI')
-                if not df.empty:
-                    df['weight'] = 0.0
-                    print("✅ Tushare获取成功")
-                    return df
+            # 获取中证A50成分股（指数代码：930050.CSI）
+            df = pro.index_member(index_code='930050.CSI')
+            if not df.empty and 'ts_code' in df.columns:
+                df = df[['ts_code']].rename(columns={'ts_code': 'symbol'})
+                df['weight'] = 0.0
+                df['name'] = 'Unknown'
+                print("⚠️  Tushare 数据不含权重和名称，仅作符号参考")
+                return df[['symbol', 'name', 'weight']]
         except Exception as e:
-            print(f"⚠️  Tushare获取失败: {e}")
-
+            print(f"⚠️ Tushare 获取失败: {e}")
         return None
 
     def get_official_components(self):
-        """返回官方数据（最可靠）"""
-        import pandas as pd
-        print("⚠️  使用官方离线数据（100%可靠）")
+        print("✅ 使用内置官方中证A50成分股数据（2024-12-16 版本）")
         return pd.DataFrame(OFFICIAL_A50_COMPONENTS)
 
     def load_yaml_components(self):
-        """加载YAML中的成分股"""
         if not self.yaml_path.exists():
             return set()
-
         with open(self.yaml_path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f) or {}
-
-        return set([item['symbol'] for item in data.get('csi_a50', [])])
+        csi_a50 = data.get('csi_a50', [])
+        return {item['symbol'] for item in csi_a50 if isinstance(item, dict) and 'symbol' in item}
 
     def validate_and_update(self, df_official):
-        """验证并更新"""
-        official_symbols = set(df_official['symbol'].tolist())
+        official_symbols = set(df_official['symbol'].dropna().astype(str).tolist())
         yaml_symbols = self.load_yaml_components()
 
         missing = official_symbols - yaml_symbols
@@ -147,73 +142,62 @@ class CSI_A50_Updater:
 
         print("=" * 50)
         print("验证结果：")
-        print(f"官方数据: {len(official_symbols)}只")
-        print(f"本地文件: {len(yaml_symbols)}只")
-
+        print(f"官方数据: {len(official_symbols)} 只")
+        print(f"本地文件: {len(yaml_symbols)} 只")
         if missing:
-            print(f"\n❌ 缺失: {len(missing)}只")
-            print(list(missing))
+            print(f"\n❌ 缺失 ({len(missing)}): {sorted(missing)}")
         if extra:
-            print(f"\n❌ 多余: {len(extra)}只")
-            print(list(extra))
-
-        return missing or extra  # 如果有差异返回True
+            print(f"\n❌ 多余 ({len(extra)}): {sorted(extra)}")
+        return bool(missing or extra)
 
     def update_yaml(self, df):
-        """更新YAML文件"""
-        try:
-            components = df.to_dict('records')
+        components = df.to_dict('records')
+        full_data = {}
+        if self.yaml_path.exists():
+            with open(self.yaml_path, 'r', encoding='utf-8') as f:
+                full_data = yaml.safe_load(f) or {}
 
-            # 读取保留其他配置
-            if self.yaml_path.exists():
-                with open(self.yaml_path, 'r', encoding='utf-8') as f:
-                    full_data = yaml.safe_load(f) or {}
-            else:
-                full_data = {}
+        full_data['csi_a50'] = components
 
-            full_data['csi_a50'] = components
+        # ✅ 确保 config 目录存在
+        self.yaml_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # 写入
-            with open(self.yaml_path, 'w', encoding='utf-8') as f:
-                yaml.dump(full_data, f, allow_unicode=True, indent=2)
-
-            print(f"\n✅ YAML更新成功: {self.yaml_path}")
-            print(f"   共 {len(components)} 只成分股")
-
-        except Exception as e:
-            print(f"\n❌ 更新失败: {e}")
-            sys.exit(1)
+        with open(self.yaml_path, 'w', encoding='utf-8') as f:
+            yaml.dump(full_data, f, allow_unicode=True, indent=2, default_flow_style=False)
+        print(f"\n✅ YAML 更新成功: {self.yaml_path} (共 {len(components)} 只成分股)")
 
 
 def main():
-    """主流程"""
     print("=" * 60)
-    print("中证A50成分股自动更新工具")
+    print("中证A50成分股自动更新工具（CSI A50, 930050.CSI）")
+    print(f"当前日期: {datetime.now().strftime('%Y-%m-%d')}")
     print("=" * 60)
 
     updater = CSI_A50_Updater()
 
-    # 1. 尝试Tushare（可选）
+    # 尝试 Tushare（可选）
     df = updater.try_tushare()
 
-    # 2. 使用官方数据
-    if df is None:
+    # 主力数据源：内置官方数据
+    if df is None or df.empty:
         df = updater.get_official_components()
 
-    if df is None:
-        print("❌ 无法获取任何数据")
+    if df is None or df.empty:
+        print("❌ 无法获取有效成分股数据")
         sys.exit(1)
 
-    # 3. 验证和更新
-    print("\n" + "=" * 60)
+    print(f"\n📊 当前数据源包含 {len(df)} 只成分股")
+
     has_diff = updater.validate_and_update(df)
 
     if has_diff:
-        print("\n⚠️  数据不匹配，需要更新")
-        if input("是否更新YAML文件？(y/N): ").lower() == 'y':
+        print("\n🔄 检测到成分股变动，建议更新本地配置。")
+        if input("是否更新 symbols.yaml？(y/N): ").strip().lower() == 'y':
             updater.update_yaml(df)
+        else:
+            print("⏭️  跳过更新。")
     else:
-        print("\n✅ 数据已是最新，无需更新")
+        print("\n✅ 本地数据已是最新，无需操作。")
 
 
 if __name__ == '__main__':
