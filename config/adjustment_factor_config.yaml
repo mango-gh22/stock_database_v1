@@ -1,0 +1,53 @@
+# 复权因子配置 - P6阶段单线程约束版
+adjustment_factors:
+  # Baostock数据源配置
+  baostock:
+    enabled: true
+    endpoint: "query_dividend_data"
+    fields: [
+      "code", "dividPreNoticeDate", "dividAgmPumDate",
+      "dividPlanAnnounceDate", "dividPlanDate", "dividRegistDate",
+      "dividOperateDate", "dividPayDate", "dividCashPsBeforeTax",
+      "dividCashPsAfterTax", "dividStocksPs", "dividCashStock",
+      "dividReserveToStockPs"
+    ]
+    # 稳健性配置（复制自baostock_daily_downloader.py）
+    max_retries: 3
+    retry_delay_base: 3
+    min_request_interval: 1.5  # 秒
+    enable_cache: true  # P8阶段启用缓存
+
+  # 存储配置
+  storage:
+    table_name: "adjust_factors"
+    batch_size: 500  # 批量插入大小
+    use_upsert: true  # ON DUPLICATE KEY UPDATE模式
+
+  # 下载模式配置
+  download:
+    # 线程数（P6强制1，P7/P8可调整）
+    thread_num: 1
+    # 是否使用数据库中的最新日期作为起始点
+    incremental_mode: true
+    # 首次下载回溯天数（无历史数据时）
+    initial_lookback_days: 3650  # 约10年
+
+  # 复权因子计算配置
+  calculation:
+    # 除权除息日字段优先级
+    ex_date_priority: ["dividAgmPumDate", "dividOperateDate", "dividRegistDate"]
+    # 默认前复权因子计算基准价
+    forward_base_price: 1.0
+
+  # 日志与监控
+  logging:
+    log_level: "INFO"
+    log_file: "logs/adjustment_factor.log"
+    enable_performance_monitoring: true
+
+  # P7/P8预留：独立运行配置
+  daemon:
+    enabled: false  # P6为false，P7可启用
+    schedule: "0 2 * * *"  # 每日2点执行
+    symbols_source: "config/symbols.yaml"  # 或 "database"
+    auto_retry_failed: true
