@@ -14,7 +14,7 @@ sys.path.append('.')
 from src.data.integrated_pipeline import IntegratedDataPipeline
 
 pipeline = IntegratedDataPipeline()
-result = pipeline.process_single_stock('sh600519', '20240101', '20240105')
+result = pipeline.process_single_stock('sh600036', '20240101', '20240115')
 
 print("\n" + "=" * 50)
 print("存储结果:", result)
