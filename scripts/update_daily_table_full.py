@@ -5,6 +5,7 @@
 # @ Date：2025/12/12 20:07
 """
 desc 动态添加缺失列（逐步更新）
+python -m scripts.update_daily_table_full
 """
 # scripts/update_daily_table_full.py
 """
