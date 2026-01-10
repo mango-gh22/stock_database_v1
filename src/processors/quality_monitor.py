@@ -26,7 +26,6 @@ from src.query.query_engine import QueryEngine
 
 logger = logging.getLogger(__name__)
 
-
 class QualityMonitor:
     """质量监控器"""
 

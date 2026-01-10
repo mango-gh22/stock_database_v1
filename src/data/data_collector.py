@@ -6,6 +6,7 @@
 """
 desc 数据采集器抽象基类
 定义统一接口，支持多数据源（Baostock/Tushare/AKShare等）
+目前基于baostock，稳定可靠，低效（受平台单线程数据下载所限）
 """
 
 from abc import ABC, abstractmethod

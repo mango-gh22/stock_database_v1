@@ -5,11 +5,6 @@
 # @ Date：2026/1/2 14:19
 """
 desc 批量更新A50成分股
-"""
-
-# _*_ coding: utf-8 _*_
-# File Path: E:/MyFile/stock_database_v1/scripts/download_a50_batch.py
-"""
 批量下载中证A50成分股数据
 python scripts/download_a50_batch.py
 """

@@ -23,6 +23,7 @@ sys.path.append(os.path.dirname(project_root))
 
 from src.config.logging_config import setup_logging
 from src.database.db_connector import DatabaseConnector
+from src.utils.code_converter import normalize_stock_code  # ✅ 强制添加此行
 
 logger = setup_logging()
 
@@ -64,7 +65,7 @@ class DataStorage:
         self.logger.info(f"数据库连接器: {self.db_connector.config.get('host')}:{self.db_connector.config.get('port')}")
 
     def _setup_column_mappings(self):
-        """设置列名映射关系 - 修复版"""
+        """设置列名映射关系 - 修复版-修正版：量比"""
         # 正确的映射关系（根据表结构）
         self.column_mapping = {
             # 价格字段
@@ -76,13 +77,27 @@ class DataStorage:
             # 成交字段 - 关键修复！
             'volume': 'volume',
             'amount': 'amount',      # Baostock的amount → 数据库的amount
-            'turn': 'turnover_rate', # Baostock的turn → 数据库的turnover_rate
-            
+
+            # 涨跌幅
+            'pctChg': 'change_percent',
+            'pct_change': 'change_percent',
+            'change': 'change_amount',
+
+            # 技术指标
+            'turnoverrate': 'turnover_rate',  # ✅ 修正：换手率--总股本
+            'turn': 'turnover_rate_f',  # ✅ 修正:Baostock的turn → 数据库的turnover_rate_f流通换手率
+
+            # ✅ 新增：量比（从外部计算）
+            'volume_ratio': 'volume_ratio',
+
             # 其他字段
             'preclose': 'pre_close_price',
+            'pre_close': 'pre_close_price',
             'pctChg': 'change_percent',
             'amplitude': 'amplitude',
-            'turnover': 'turnover_rate_f',
+            'turnover': 'turnover_rate',
+            'adjustflag': 'adjust_flag',
+            'tradestatus': 'trade_status',
             
             # 财务指标
             'pe': 'pe',
@@ -124,6 +139,7 @@ class DataStorage:
             default_cols = {
                 'symbol', 'trade_date', 'open_price', 'high_price', 'low_price',
                 'close_price', 'pre_close_price', 'volume', 'amount', 'turnover_rate',
+                'turnover_rate_f',
                 'change_percent', 'ma5', 'ma10', 'ma20', 'ma30', 'ma60', 'ma120', 'ma250',
                 'amplitude', 'data_source', 'processed_time', 'quality_grade',
                 'created_time', 'updated_time', 'volume_ma5', 'volume_ma10', 'volume_ma20',
@@ -148,7 +164,7 @@ class DataStorage:
 
         df_processed = df.copy()
 
-        # === 1. 股票代码字段处理 ===
+        # === 1. ✅ 股票代码字段强制标准化（关键修复） ===
         symbol_created = False
 
         if 'code' in df_processed.columns:
@@ -157,19 +173,28 @@ class DataStorage:
                 lambda x: str(x).replace('.', '') if pd.notna(x) else None
             )
             symbol_created = True
-            logger.debug(f"从 'code' 字段生成 symbol")
+            logger.debug(f"从 'code' 字段生成标准化 symbol")
 
         elif 'bs_code' in df_processed.columns:
-            df_processed['symbol'] = df_processed['bs_code']
+            # 同样处理 bs_code
+            df_processed['symbol'] = df_processed['bs_code'].apply(
+                lambda x: str(x).replace('.', '') if pd.notna(x) else None
+            )
             symbol_created = True
-            logger.debug(f"从 'bs_code' 字段生成 symbol")
+            logger.debug(f"从 'bs_code' 字段生成标准化 symbol")
 
         elif 'symbol' in df_processed.columns:
+            # 如果已有 symbol 列，也进行标准化（防止已经是 sh.600519 格式）
+            df_processed['symbol'] = df_processed['symbol'].apply(
+                lambda x: normalize_stock_code(str(x)) if pd.notna(x) else None
+            )
             symbol_created = True
+            logger.debug(f"标准化现有 symbol 字段")
 
         if not symbol_created:
             logger.error(f"❌ 预处理失败：找不到股票代码字段")
             return pd.DataFrame()
+
 
         # === 2. 日期字段处理 ===
         date_created = False
@@ -208,8 +233,8 @@ class DataStorage:
             'change': 'change_amount',
 
             # 技术指标
-            'turn': 'turnover_rate',
-            'turnoverrate': 'turnover_rate',
+            'turn': 'turnover_rate_f',  # 同步修正
+            # 'turnoverrate': 'turnover_rate',
             'amplitude': 'amplitude',
 
             # 其他字段
@@ -231,15 +256,24 @@ class DataStorage:
         numeric_fields = [
             'open_price', 'high_price', 'low_price', 'close_price',
             'pre_close_price', 'volume', 'amount', 'change_percent',
-            'turnover_rate', 'change_amount', 'amplitude'
+            'turnover_rate',
+            'turnover_rate_f',  # ✅ 强制添加 turnover_rate_f
+            'amplitude',
+            'change_amount', 'amplitude'
         ]
 
-        for col in numeric_fields:
-            if col in df_processed.columns:
+        for field in numeric_fields:
+            if field in df_processed.columns:
                 try:
-                    df_processed[col] = pd.to_numeric(df_processed[col], errors='coerce')
+                    # errors='coerce' 会将空字符串转为 NaN
+                    df_processed[field] = pd.to_numeric(df_processed[field], errors='coerce')
+                    logger.debug(f"数值转换 {field}: {df_processed[field].dtype}")
                 except Exception as e:
-                    logger.warning(f"数值转换失败 {col}: {e}")
+                    logger.warning(f"数值转换失败 {field}: {e}")
+
+        # ✅ 额外清理：删除所有字段都为空的行（防御）可选，根据业务需求
+        # 删除含有 NaN 的行（可选，根据业务需求）
+        df_processed = df_processed.dropna(subset=['turnover_rate_f'], how='any')
 
         # === 5. 清理原始字段 ===
         columns_to_remove = ['code', 'bs_code', 'date', 'open', 'high', 'low', 'close',
@@ -282,15 +316,35 @@ class DataStorage:
             logger.warning("过滤后无有效数据行")
             return df_processed
 
-        # === 8. 日期格式化 ===
+
+        # === 8. 日期格式化（关键修复） ===
         if 'trade_date' in df_processed.columns:
             try:
+                # 先确保是datetime类型（兼容多种输入格式）
                 if not pd.api.types.is_datetime64_any_dtype(df_processed['trade_date']):
-                    df_processed['trade_date'] = pd.to_datetime(df_processed['trade_date'], errors='coerce')
+                    # 支持两种格式：YYYYMMDD 和 YYYY-MM-DD
+                    df_processed['trade_date'] = pd.to_datetime(
+                        df_processed['trade_date'],
+                        format='%Y%m%d',
+                        errors='coerce'
+                    )
+                    if df_processed['trade_date'].isna().all():
+                        # 如果YYYYMMDD解析失败，尝试标准格式
+                        df_processed['trade_date'] = pd.to_datetime(
+                            df_processed['trade_date'],
+                            errors='coerce'
+                        )
 
+                # 转换为 MySQL 需要的 YYYY-MM-DD 格式字符串
                 df_processed['trade_date'] = df_processed['trade_date'].dt.strftime('%Y-%m-%d')
+                logger.debug("trade_date 已格式化为 YYYY-MM-DD")
+
             except Exception as e:
                 logger.error(f"日期格式化失败: {e}")
+                # 如果失败，保持原始值但记录警告
+                logger.warning(f"日期列可能包含无效值: {df_processed['trade_date'].unique()[:5]}")
+
+
 
         # === 9. 添加元数据字段 ===
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -317,6 +371,40 @@ class DataStorage:
             sample_symbol = df_processed['symbol'].iloc[0]
             sample_date = df_processed['trade_date'].iloc[0] if 'trade_date' in df_processed.columns else 'N/A'
             logger.debug(f"样本数据: {sample_symbol}, {sample_date}")
+
+        # === 12. 计算量比（成交量比）===
+        if 'volume' in df_processed.columns and len(df_processed) > 5:
+            # 计算过去5日平均成交量（不包含当日）
+            df_processed['volume_ratio'] = (
+                    df_processed['volume'] /
+                    df_processed['volume'].shift(1).rolling(5, min_periods=1).mean()
+            )
+
+            # 处理前5天的 NaN（用1.0填充，表示正常水平）
+            df_processed['volume_ratio'] = df_processed['volume_ratio'].fillna(1.0)
+
+            # 限制极值（防止异常波动）
+            df_processed['volume_ratio'] = df_processed['volume_ratio'].clip(0, 50)
+
+            logger.debug(
+                f"计算量比: 均值={df_processed['volume_ratio'].mean():.2f}, 最大={df_processed['volume_ratio'].max():.2f}")
+
+        # === 13. 计算振幅（amplitude）===
+        if all(col in df_processed.columns for col in ['high_price', 'low_price', 'pre_close_price']):
+            # 振幅 = (最高价 - 最低价) / 前收盘价 * 100%
+            df_processed['amplitude'] = (
+                    (df_processed['high_price'] - df_processed['low_price']) /
+                    df_processed['pre_close_price'] * 100
+            ).round(4)
+
+            # 处理前收盘价为0或NaN的情况
+            df_processed.loc[
+                df_processed['pre_close_price'].eq(0) | df_processed['pre_close_price'].isna(),
+                'amplitude'
+            ] = 0
+
+            logger.debug(
+                f"计算振幅: 均值={df_processed['amplitude'].mean():.2f}%, 最大={df_processed['amplitude'].max():.2f}%")
 
         return df_processed
 

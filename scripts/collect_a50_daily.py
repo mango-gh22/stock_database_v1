@@ -76,7 +76,16 @@ def main():
         logger.info(f"[{i}/{len(symbols)}] 处理 {symbol}")
 
         # 1. 查询数据库中该股最新交易日（格式：'YYYY-MM-DD'）
-        latest_in_db = storage.get_latest_trade_date(symbol)
+        # latest_in_db = storage.get_latest_trade_date(symbol)
+        last_date_str = storage.get_last_update_date(symbol)
+        if last_date_str:
+            # 转为整数格式 YYYYMMDD，与全局截止日 global_end_date 格式一致
+            latest_in_db = int(last_date_str.replace('-', ''))
+            logger.info(f"[{symbol}] 数据库最新交易日: {latest_in_db}")
+        else:
+            latest_in_db = None
+            logger.info(f"[{symbol}] 数据库无历史数据，将全量采集")
+
 
         if latest_in_db:
             # 转为 datetime，加一天，再找下一个交易日
