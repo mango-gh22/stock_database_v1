@@ -4,11 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/21 0:39
 """
-desc 
-"""
-# 创建数据补充脚本：scripts/seed_test_data.py
-"""
-补充测试数据 - 为P6阶段准备基础数据
+desc 补充测试数据 - 为P6阶段准备基础数据
 """
 import sys
 import os

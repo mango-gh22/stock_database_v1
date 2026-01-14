@@ -4,12 +4,7 @@
 # @ Author: mango-gh22
 # @ Date：2026/1/3 8:51
 """
-desc 
-"""
-
-# src/data/baostock_factor_config.py
-"""
-PB因子下载配置管理模块
+desc PB因子下载配置管理模块
 """
 
 import yaml

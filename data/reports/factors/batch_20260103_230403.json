@@ -1,0 +1,108 @@
+{
+  "batch_id": "batch_20260103_230403",
+  "summary": {
+    "total_symbols": 5,
+    "successful": 0,
+    "failed": 5,
+    "skipped": 0,
+    "success_rate": 0.0,
+    "total_records": 0,
+    "total_downloaded": 0,
+    "total_stored": 0,
+    "cache_hits": 0,
+    "retry_count": 0
+  },
+  "performance": {
+    "start_time": "2026-01-03T23:03:57.615114",
+    "end_time": "2026-01-03T23:04:03.813085",
+    "duration_seconds": 6.2,
+    "avg_execution_time_per_symbol": NaN,
+    "symbols_per_second": 0.807,
+    "records_per_second": 0.0
+  },
+  "configuration": {
+    "batch_size": 10,
+    "max_retries": 3,
+    "retry_delay": 5
+  },
+  "detailed_results": [
+    {
+      "symbol": {
+        "name": "贵州茅台",
+        "symbol": "600519.SH",
+        "weight": 10.38
+      },
+      "status": "error",
+      "error": "None",
+      "retry_count": 3
+    },
+    {
+      "symbol": {
+        "name": "宁德时代",
+        "symbol": "300750.SZ",
+        "weight": 8.45
+      },
+      "status": "error",
+      "error": "None",
+      "retry_count": 3
+    },
+    {
+      "symbol": {
+        "name": "中国平安",
+        "symbol": "601318.SH",
+        "weight": 6.89
+      },
+      "status": "error",
+      "error": "None",
+      "retry_count": 3
+    },
+    {
+      "symbol": {
+        "name": "招商银行",
+        "symbol": "600036.SH",
+        "weight": 5.22
+      },
+      "status": "error",
+      "error": "None",
+      "retry_count": 3
+    },
+    {
+      "symbol": {
+        "name": "美的集团",
+        "symbol": "000333.SZ",
+        "weight": 4.67
+      },
+      "status": "error",
+      "error": "None",
+      "retry_count": 3
+    }
+  ],
+  "failed_symbols": [
+    {
+      "name": "贵州茅台",
+      "symbol": "600519.SH",
+      "weight": 10.38
+    },
+    {
+      "name": "宁德时代",
+      "symbol": "300750.SZ",
+      "weight": 8.45
+    },
+    {
+      "name": "中国平安",
+      "symbol": "601318.SH",
+      "weight": 6.89
+    },
+    {
+      "name": "招商银行",
+      "symbol": "600036.SH",
+      "weight": 5.22
+    },
+    {
+      "name": "美的集团",
+      "symbol": "000333.SZ",
+      "weight": 4.67
+    }
+  ],
+  "successful_symbols": []
+}

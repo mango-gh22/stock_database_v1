@@ -63,7 +63,7 @@ class BaostockPBFactorDownloader(BaseFactorDownloader):
         ]
 
         # 本次下载的因子字段（估值指标）
-        self.download_factor_fields = ['pe_ttm', 'pb', 'ps_ttm']
+        self.download_factor_fields = ['pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm', 'turnover_rate_f']
 
         logger.info(f"初始化PB因子下载器，下载字段: {self.download_factor_fields}")
 
@@ -338,9 +338,12 @@ class BaostockPBFactorDownloader(BaseFactorDownloader):
 
         for col in numeric_columns:
             if col in df_processed.columns:
+                # 先移除可能存在的千分位逗号
+                df_processed[col] = df_processed[col].astype(str).str.replace(',', '')
                 df_processed[col] = pd.to_numeric(df_processed[col], errors='coerce')
+
                 # 处理异常值
-                if col in ['pe_ttm', 'pb', 'ps_ttm']:
+                if col in ['pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm']:
                     # 估值指标应该为正数，负值或极大值设为NaN
                     df_processed[col] = df_processed[col].apply(
                         lambda x: x if pd.notna(x) and 0 < x < 1e6 else np.nan

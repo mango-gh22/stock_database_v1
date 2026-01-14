@@ -4,101 +4,74 @@
 # 版本：v0.1.0
 # ====================
 
-### Python 特有 ###
-# 字节码编译文件[citation:2][citation:8]
-__pycache__/
-*.py[cod]
-*$py.class
-*.pyo
-*.so
-
-# 虚拟环境目录[citation:8]
-# 注意：如果您使用 `.venv` 作为环境名，确保它在此被忽略
-.venv/
-venv/
-env/
-ENV/
-
 # ------------增加项------
-.env/
 config/*.xls
 tests/demo/
 tests/demo*
 
-#----涉及敏感信息类--------
-.env
-*.key
-*.pem
-*.p12
 secrets.yaml
 config.local.yaml
-.DS_Store
-*.log
-
-
-# 包管理
-Pipfile.lock
-poetry.lock
-.python-version
-
-### 开发工具与IDE ###
-# PyCharm[citation:8]
-.idea/
-*.iml
-
-# VSCode[citation:8]
-.vscode/
-*.code-workspace
-
-# Vim/Neovim 临时文件[citation:2][citation:8]
-*.swp
-*.swo
-*~
-*.un~
-
-### 项目数据与缓存 ###
-# 项目本地数据目录（存放下载的原始数据、缓存等，不提交）
-data/
-# !data/README.md  # 如果想保留数据目录的说明文件，可取消此注释
 
 # 项目建设备忘录/笔记
 notedb/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# 本地日志文件[citation:2][citation:8]
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# 环境变量 敏感信息
+.env
+
+# 日志文件
 logs/
 *.log
 
-# 缓存文件
-.cache
-.pytest_cache
-.coverage
+# 数据文件（可重新下载）
+data/cache/
+data/raw/
+data/exports/
+data/backup/
 
-### 系统文件 ###
-# macOS[citation:2]
-.DS_Store
-.DS_Store?
-
-# Windows[citation:2]
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# 通用
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 *~
-*.bak
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
 *.tmp
 *.temp
+*.bak
+*.backup
 
-### 数据库相关（本地开发用） ###
-# SQLite等本地数据库文件[citation:5][citation:8]
-*.db
-*.sqlite
-*.sqlite3
-db.sqlite3
-
-### 配置文件（含敏感信息）###[citation:7]
-# 注意：包含密码、密钥的配置文件切勿提交！
-*.local
-secrets.ini
-config_private.yaml

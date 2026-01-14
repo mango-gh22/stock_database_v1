@@ -1,0 +1,25 @@
+# File Path: E:/MyFile/stock_database_v1/config/test_symbols.yaml
+# 简单格式的A50成分股列表（纯代码）
+csi_a50:
+  - "600519.SH"
+  - "000001.SZ"
+  - "000858.SZ"
+  - "000333.SZ"
+  - "600036.SH"
+  - "601318.SH"
+  - "601166.SH"
+  - "600030.SH"
+  - "300750.SZ"
+  - "601888.SH"
+
+# 或者使用字典格式（如果需要权重信息）
+csi_a50_dict:
+  - symbol: "600519.SH"
+    name: "贵州茅台"
+    weight: 10.38
+  - symbol: "000001.SZ"
+    name: "平安银行"
+    weight: 3.45
+  - symbol: "300750.SZ"
+    name: "宁德时代"
+    weight: 8.45

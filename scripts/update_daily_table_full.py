@@ -6,9 +6,6 @@
 """
 desc 动态添加缺失列（逐步更新）
 python -m scripts.update_daily_table_full
-"""
-# scripts/update_daily_table_full.py
-"""
 完整更新stock_daily_data表结构
 """
 from src.database.db_connector import DatabaseConnector

@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-12-10T20:26:49.118451",
+  "total_symbols": 3,
+  "success_count": 0,
+  "error_count": 3,
+  "success_rate": 0.0,
+  "date_range": {
+    "start": "20240101",
+    "end": "20240131"
+  },
+  "adjust_type": "qfq",
+  "details": [
+    {
+      "symbol": "sh600519",
+      "status": "ERROR",
+      "message": "'DataStorage' object has no attribute 'save_daily_data'",
+      "records": 0
+    },
+    {
+      "symbol": "sz000001",
+      "status": "ERROR",
+      "message": "'DataStorage' object has no attribute 'save_daily_data'",
+      "records": 0
+    },
+    {
+      "symbol": "sz000858",
+      "status": "ERROR",
+      "message": "'DataStorage' object has no attribute 'save_daily_data'",
+      "records": 0
+    }
+  ]
+}

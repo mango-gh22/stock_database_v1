@@ -1,0 +1,201 @@
+{
+  "batch_id": "batch_20251228_171715",
+  "start_time": "2025-12-28T17:17:15.212797",
+  "end_time": "2025-12-28T17:17:19.896768",
+  "total_processing_time": 4.68,
+  "summary": {
+    "total_symbols": 20,
+    "success": 19,
+    "failed": 1,
+    "no_data": 0,
+    "total_records": 175
+  },
+  "performance": {
+    "symbols_per_second": 4.27,
+    "records_per_second": 37.36
+  },
+  "detailed_results": [
+    {
+      "symbol": "sh600004",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.6559960842132568,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600000",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.6729958057403564,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600006",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.7279927730560303,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600007",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.9299912452697754,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600008",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.9089992046356201,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600009",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.8839993476867676,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600010",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.8639950752258301,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600011",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.8579950332641602,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600012",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.8609919548034668,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600015",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.6009972095489502,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600016",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.9689974784851074,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600018",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 0,
+      "processing_time": 0.38700008392333984,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600017",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.9809980392456055,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600019",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0.007995128631591797,
+      "quality_score": 0,
+      "errors": [
+        "time data '2025-12-26' does not match format '%Y%m%d'"
+      ]
+    },
+    {
+      "symbol": "sh600020",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.6519958972930908,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600021",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.65299391746521,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600022",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.6839990615844727,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600023",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.41799020767211914,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600025",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 10,
+      "processing_time": 0.42899203300476074,
+      "quality_score": 100,
+      "errors": []
+    },
+    {
+      "symbol": "sh600026",
+      "status": "success",
+      "records_fetched": 5,
+      "records_stored": 5,
+      "processing_time": 0.419999361038208,
+      "quality_score": 100,
+      "errors": []
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "pipeline_version": "1.0",
+  "execution_id": "pipeline_20251214105242_d94113",
+  "mode": "specific",
+  "parameters": {
+    "symbols": [
+      "600519"
+    ],
+    "date_range": {
+      "start": "20241201",
+      "end": "20241205"
+    },
+    "max_concurrent": 1,
+    "skip_existing": false
+  },
+  "timestamp": "2025-12-14T10:52:42.443014",
+  "status": "SUCCESS",
+  "message": "执行完成",
+  "system_info": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.12.7",
+    "hostname": "WIN-20230603KHM",
+    "cpu_count": 4,
+    "memory_total_gb": 6.0,
+    "memory_available_gb": 0.87,
+    "memory_percent": 85.5,
+    "process_id": 3012
+  },
+  "performance": {
+    "start_time": "2025-12-14T10:52:42.251011",
+    "end_time": "2025-12-14T10:52:42.443014",
+    "time_elapsed_seconds": 0.192003,
+    "time_elapsed_human": "0:00:00.192003",
+    "total_processed": 1,
+    "total_success": 1,
+    "total_failed": 0,
+    "total_records": 4,
+    "success_rate": 100.0
+  },
+  "results": {
+    "status": "COMPLETED",
+    "requested_symbols": 1,
+    "processed_symbols": [
+      "sh600519"
+    ],
+    "failed_symbols": [],
+    "skipped_symbols": [],
+    "date_ranges_processed": 1,
+    "total_records": 4,
+    "avg_quality_score": 80.0,
+    "quality_scores": {
+      "sh600519": 80.0
+    },
+    "storage_summary": {
+      "new": 0,
+      "updated": 8,
+      "skipped": 0,
+      "failed": 0
+    },
+    "symbol_errors": [],
+    "details": [
+      {
+        "symbol": "sh600519",
+        "status": "PROCESSED",
+        "records": 4,
+        "quality_score": 80.0,
+        "storage_summary": {
+          "new": 0,
+          "updated": 8,
+          "skipped": 0
+        },
+        "date_ranges_processed": 1,
+        "successful_ranges": [
+          [
+            "20241201",
+            "20241205"
+          ]
+        ],
+        "adjust_type": "qfq",
+        "priority": "medium"
+      }
+    ]
+  }
+}

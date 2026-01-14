@@ -1,0 +1,62 @@
+{
+  "pipeline_version": "1.0",
+  "execution_id": "pipeline_20251214103310_3c9733",
+  "mode": "incremental",
+  "parameters": {
+    "symbols": [
+      "sh600519"
+    ],
+    "days_back": 2,
+    "max_concurrent": 1,
+    "quality_threshold": 30
+  },
+  "timestamp": "2025-12-14T10:33:10.450127",
+  "status": "SUCCESS",
+  "message": "执行完成",
+  "system_info": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python_version": "3.12.7",
+    "hostname": "WIN-20230603KHM",
+    "cpu_count": 4,
+    "memory_total_gb": 6.0,
+    "memory_available_gb": 1.23,
+    "memory_percent": 79.4,
+    "process_id": 13744
+  },
+  "performance": {
+    "start_time": "2025-12-14T10:33:09.381127",
+    "end_time": "2025-12-14T10:33:10.450127",
+    "time_elapsed_seconds": 1.069,
+    "time_elapsed_human": "0:00:01.069000",
+    "total_processed": 1,
+    "total_success": 0,
+    "total_failed": 1,
+    "total_records": 0,
+    "success_rate": 0.0
+  },
+  "results": {
+    "status": "COMPLETED",
+    "total_symbols": 1,
+    "updated_symbols": [],
+    "new_symbols": [],
+    "failed_symbols": [
+      "sh600519"
+    ],
+    "skipped_symbols": [],
+    "success_rate": 0.0,
+    "quality_summary": {
+      "excellent": 0,
+      "good": 0,
+      "fair": 0,
+      "poor": 0
+    },
+    "details": [
+      {
+        "symbol": "sh600519",
+        "status": "FAILED",
+        "error": "'close'",
+        "records": 0
+      }
+    ]
+  }
+}

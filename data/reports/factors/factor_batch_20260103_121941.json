@@ -1,0 +1,28 @@
+{
+  "batch_id": "factor_batch_20260103_121941",
+  "timestamp": "2026-01-03T12:19:41.227135",
+  "date_range": {
+    "start": "20251227",
+    "end": "20260103"
+  },
+  "statistics": {
+    "total_symbols": 3,
+    "successful": 3,
+    "failed": 0,
+    "success_rate": 100.0,
+    "total_records": 9,
+    "duration_seconds": 0,
+    "speed_symbols_per_second": 0
+  },
+  "success_symbols": [
+    "600519",
+    "000001",
+    "000858"
+  ],
+  "failed_symbols": [],
+  "factors_downloaded": [
+    "pe_ttm",
+    "pb",
+    "ps_ttm"
+  ]
+}

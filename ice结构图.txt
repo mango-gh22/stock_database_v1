@@ -1,26 +1,28 @@
 stock_database_v1/
+├── adjust_factor_data
 ├── config
-│   ├── 930050closeweight.xls
-│   ├── 930050cons.xls
-│   ├── 930050indicator.xls
 │   ├── __init__.py
+│   ├── adjustment_factor_config.yaml
 │   ├── api_config.yaml
 │   ├── data_sources.yaml
 │   ├── datab.yaml
 │   ├── database.yaml
+│   ├── factor_config.yaml
 │   ├── generate_a50_symbols_yaml.py
 │   ├── indicators.yaml
 │   ├── performance.yaml
-│   ├── performance_备份.yaml
 │   ├── pipeline_config.yaml
 │   ├── quality_rules.yaml
 │   ├── query_config.yaml
 │   ├── symbols.yaml
-│   ├── symbols_copy.yaml
+│   ├── symbols_copy_暂存.yaml
+│   ├── test_symbols.yaml
 │   └── tushare_config.yaml
 ├── data
 │   ├── cache
 │   │   ├── baostock
+│   │   │   ├── adjustment_factors
+│   │   │   └── factors
 │   │   ├── indicators
 │   │   └── tushare
 │   ├── exports
@@ -30,11 +32,25 @@ stock_database_v1/
 │   ├── processed
 │   ├── raw
 │   ├── reports
-│   │   ├── batch_20251228_171715.json
-│   │   ├── batch_20251228_214518.json
+│   │   ├── factors
+│   │   │   ├── batch_20260103_230157.json
 ...
+│   │   │   ├── batch_20260111_090657.json
+│   │   │   ├── batch_20260111_090657.txt
+│   │   │   ├── factor_batch_20260103_115911.json
+...
+│   │   │   └── factor_update_20260103_134601.json
+...
+│   │   ├── batch_update_20251207_223713.json
+...
+│   │   ├── pipeline_incremental_20251214_105242.json
+│   │   ├── pipeline_incremental_20251214_110242.json
+...
+│   │   ├── pipeline_report_20251213_212800.json
+│   │   ├── pipeline_specific_20251214_103311.json
 │   │   ├── pipeline_specific_20251214_105242.json
 │   │   └── pipeline_specific_20251214_110242.json
+│   ├── test_samples
 │   ├── ths_export
 │   └── test_stock_data.csv
 ├── docs
@@ -49,51 +65,81 @@ stock_database_v1/
 │   └── P6
 ├── examples
 │   ├── __init__.py
-│   └── basic_indicators_usage.py
+│   ├── basic_indicators_usage.py
+│   └── p6_adjustment_factor_usage.py
+├── INFO
+│   ├── stock_database_20260107.log
+│   └── stock_database_20260109.log
 ├── logs
+│   ├── adjustment_factors
+│   │   └── calculation_20260102.jsonl
 │   ├── calculations
 │   ├── app.log
+│   ├── pb_factor_download_20260103.log
 │   ├── stock_database_20251205.log
 ...
-│   ├── stock_database_20251228.log
-│   ├── stock_database_20251231.log
-│   └── stock_database_20260101.log
+│   ├── stock_database_20260110.log
+│   └── stock_database_20260111.log
 ├── reports
 │   └── quality
-│       ├── quality_report_20251214.json
-...
 │       └── quality_report_20251221.json
 ├── scripts
+│   ├── aliaser
+│   │   └── __init__.py
 │   ├── data
 │   │   └── cache
+│   │       ├── baostock
+│   │       │   └── factors
 │   │       └── indicators
 │   ├── logs
 │   │   ├── app.log
-│   │   └── stock_database_20251227.log
+│   │   ├── stock_database_20251227.log
+│   │   ├── stock_database_20260103.log
+│   │   └── stock_database_20260106.log
 │   ├── schema
+│   │   ├── adjust_factor.sql
 │   │   ├── create_quality_tables.sql
 │   │   ├── create_tables_complete.sql
-│   │   ├── create_tables_fixed.sql
 │   │   └── fix_collation.sql
+│   ├── calculate_technical_indicators.py
+│   ├── check_factor_data.py
+│   ├── clean_database.py
 │   ├── collect_a50_daily.py
+│   ├── debug_factor_update.py
 │   ├── diagnose_collations.py
+│   ├── download_a50_complete.py
+│   ├── download_csi300.py
 │   ├── fix_collations.py
 │   ├── fix_column_mapping.py
 │   ├── fix_existing_dates.py
-│   ├── quick_validate_all.py
+│   ├── fix_symbol_format.py
+│   ├── fixed_batch_download.py
+│   ├── force_batch_download.py
+│   ├── full_batch_test.py
+│   ├── migrate_unified.py
+│   ├── quick_a50_fix_test.py
 │   ├── rollback_daily_table_full.py
+│   ├── rollback_table_schema.py
+│   ├── rollback_table_schema_fixed.py
+│   ├── run_batch_direct.py
+│   ├── run_factor_update.py
 │   ├── run_query_tests.py
 │   ├── seed_test_data.py
 │   ├── setup_database.sql
 │   ├── setup_indicators.py
 │   ├── setup_mysql.py
 │   ├── start_api_server.py
+│   ├── test_complete_factor_system.py
 │   ├── test_complete_system.py
+│   ├── test_incremental_update.py
 │   ├── test_indicators_basic.py
+│   ├── test_pb_factor_download.py
 │   ├── test_refactored_indicators.py
 │   ├── update_a50_components.py
 │   ├── update_daily_table_full.py
-│   ├── update_table_schema.py
+│   ├── update_table_schema_final.py
+│   ├── verify_data.py
+│   ├── verify_factor_storage.py
 │   └──
 ├── src
 │   ├── api
@@ -107,7 +153,6 @@ stock_database_v1/
 │   │   ├── config_validator.py
 │   │   ├── logging_config.py
 │   │   ├── performance.yaml
-│   │   ├── pipeline_config_loader.py
 │   │   ├── secret_loader.py
 │   │   └── token_loader.py
 │   ├── core
@@ -121,29 +166,37 @@ stock_database_v1/
 │   │   │   ├── stock_database_20251214.log
 │   │   │   └── stock_database_20251229.log
 │   │   ├── __init__.py
+│   │   ├── a50_fixer.py
 │   │   ├── adaptive_storage.py
 │   │   ├── adjustment_factor_collector.py
+│   │   ├── adjustment_factor_date_calculator.py
 │   │   ├── adjustment_factor_manager.py
+│   │   ├── adjustment_factor_storage.py
 │   │   ├── akshare_collector.py
+│   │   ├── baostock_adjustment_factor_downloader.py
 │   │   ├── baostock_collector.py
 │   │   ├── baostock_daily_downloader.py
+│   │   ├── baostock_factor_base.py
+│   │   ├── baostock_factor_config.py
+│   │   ├── baostock_pb_factor_downloader.py
 │   │   ├── check_table_schema.py
 │   │   ├── data_collector.py
 │   │   ├── data_manager.py
 │   │   ├── data_pipeline.py
-│   │   ├── data_pipeline.py.backup_20260101_160351
 │   │   ├── data_processor.py
 │   │   ├── data_scheduler.py
 │   │   ├── data_storage.py
 │   │   ├── date_calculator.py
 │   │   ├── diagnose_storage.py
 │   │   ├── enhanced_processor.py
+│   │   ├── factor_batch_processor.py
+│   │   ├── factor_data_pipeline.py
+│   │   ├── factor_storage_manager.py
 │   │   ├── import_csi_a50.py
 │   │   ├── integrated_pipeline.py
-│   │   ├── integrated_pipeline.py.bak
 │   │   ├── pipeline_fix.py
 │   │   ├── robust_data_preparer.py
-│   │   ├── simple_storage.py
+│   │   ├── storage_tracer.py
 │   │   ├── symbol_manager.py
 │   │   └── tushare_collector.py
 │   ├── data_processing
@@ -199,7 +252,6 @@ stock_database_v1/
 │   │   ├── parallel_calculator.py
 │   │   ├── parallel_calculator_fixed.py
 │   │   ├── performance_manager.py
-│   │   ├── performance_manager.py.backup
 │   │   └── test_performance_modules.py
 │   ├── processors
 │   │   ├── __init__.py
@@ -227,23 +279,26 @@ stock_database_v1/
 │   │   ├── __init__.py
 │   │   ├── code_converter.py
 │   │   ├── data_preparer.py
+│   │   ├── enhanced_trade_date_manager.py
 │   │   ├── logger.py
 │   │   ├── stock_pool_loader.py
 │   │   ├── test_trade_date_manager.py
-│   │   └── trade_date_manager.py
+│   │   ├── trade_date_manager.py
+│   │   └── trade_date_utils_xxx.py
 │   └── __init__.py
 ├── tests
 │   ├── data
 │   │   ├── cache
 │   │   │   └── __init__.py
-│   │   └── __init__.py
-│   ├── demo
 │   │   ├── __init__.py
-│   │   ├── demo_data_collector.py
-│   │   ├── demo_get_index_stock_a50.py
-│   │   ├── demo_get_zza50_stock.py
-│   │   ├── P6-data_storage切def
-│   │   └── update_a50_components.py
+│   │   ├── create_tables_fixed.sql
+│   │   └── simple_storage.py
+│   ├── demo
+│   ├── diagnostics
+│   │   ├── __init__.py
+│   │   ├── diagnostic_column_flow.py
+│   │   ├── diagnostic_storage_pollution.py
+│   │   └── diagnostic_table_columns.py
 │   ├── docs
 │   ├── indicators
 │   │   ├── __init__.py
@@ -251,6 +306,9 @@ stock_database_v1/
 │   │   ├── test_indicator_manager.py
 │   │   └── test_obv.py
 │   ├── integration
+│   │   ├── logs
+│   │   │   └── app.log
+│   │   └── test_adjustment_factor_pipeline.py
 │   ├── processors
 │   │   ├── __init__.py
 │   │   ├── test_adjustor.py
@@ -264,12 +322,16 @@ stock_database_v1/
 │   │   └── test_query_engine.py
 │   ├── scripts
 │   ├── unit
+│   ├── validation
+│   │   ├── __init__.py
+│   │   └── v060_verify_storage.py
 │   ├── __init__.py
 │   ├── test_mysql_connector.py
 │   ├── test_token_valid.py
 │   └── unitl_index_stock.py
 ├── .env
 ├── .gitignore
+├── .upgraded_v1.0
 ├── benchmark_p6.py
 ├── import_a50.py
 ├── local_data_collector.py
@@ -284,5 +346,7 @@ stock_database_v1/
 ├── stock_database_P5_completed_.tar.gz
 ├── stock_database_v0.5.1.zip
 ├── table_name_adapter.py
-├── test.zip
+├── test_factor_download.py
+├── test_storage_fixed.py
+├── upgrade_scripts.py
 └── user_manager.py

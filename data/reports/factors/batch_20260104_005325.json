@@ -1,0 +1,177 @@
+{
+  "batch_id": "batch_20260104_005325",
+  "summary": {
+    "total_symbols": 5,
+    "successful": 4,
+    "failed": 0,
+    "skipped": 1,
+    "success_rate": 80.0,
+    "total_records": 8,
+    "total_downloaded": 4,
+    "total_stored": 8,
+    "cache_hits": 0,
+    "retry_count": 0
+  },
+  "performance": {
+    "start_time": "2026-01-04T00:53:17.958884",
+    "end_time": "2026-01-04T00:53:25.965864",
+    "duration_seconds": 8.01,
+    "avg_execution_time_per_symbol": 0.4,
+    "symbols_per_second": 0.624,
+    "records_per_second": 1.0
+  },
+  "configuration": {
+    "batch_size": 10,
+    "max_retries": 3,
+    "retry_delay": 5
+  },
+  "detailed_results": [
+    {
+      "symbol": "sh600519",
+      "mode": "incremental",
+      "status": "no_data",
+      "records_downloaded": 0,
+      "records_stored": 0,
+      "error": null,
+      "execution_time": 0.17200446128845215,
+      "retry_count": 0,
+      "reason": "无数据",
+      "symbol_info": {
+        "normalized_symbol": "sh600519",
+        "original_input": "600519.SH",
+        "exchange": "SH",
+        "market": "上海",
+        "pure_code": "600519"
+      },
+      "original_item": "600519.SH"
+    },
+    {
+      "symbol": "sz000001",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.976996898651123,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000001",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2025-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz000001",
+        "original_input": "{'symbol': '000001.SZ', 'name': '平安银行'}",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "000001",
+        "name": "平安银行"
+      },
+      "original_item": "{'symbol': '000001.SZ', 'name': '平安银行'}"
+    },
+    {
+      "symbol": "sz000858",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.36400437355041504,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000858",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2025-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz000858",
+        "original_input": "000858",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "000858"
+      },
+      "original_item": "000858"
+    },
+    {
+      "symbol": "sz000333",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.2660064697265625,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000333",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2025-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz000333",
+        "original_input": "sz000333",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "000333"
+      },
+      "original_item": "sz000333"
+    },
+    {
+      "symbol": "sz300750",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.2219982147216797,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz300750",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2025-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz300750",
+        "original_input": "300750.SZ",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "300750"
+      },
+      "original_item": "300750.SZ"
+    }
+  ],
+  "failed_symbols": [],
+  "successful_symbols": [
+    "sz000001",
+    "sz000858",
+    "sz000333",
+    "sz300750"
+  ]
+}

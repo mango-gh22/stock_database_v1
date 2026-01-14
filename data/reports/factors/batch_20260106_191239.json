@@ -1,0 +1,188 @@
+{
+  "batch_id": "batch_20260106_191239",
+  "summary": {
+    "total_symbols": 5,
+    "successful": 5,
+    "failed": 0,
+    "skipped": 0,
+    "success_rate": 100.0,
+    "total_records": 10,
+    "total_downloaded": 5,
+    "total_stored": 10,
+    "cache_hits": 0,
+    "retry_count": 0
+  },
+  "performance": {
+    "start_time": "2026-01-06T19:12:27.989142",
+    "end_time": "2026-01-06T19:12:39.880898",
+    "duration_seconds": 11.89,
+    "avg_execution_time_per_symbol": 1.18,
+    "symbols_per_second": 0.42,
+    "records_per_second": 0.84
+  },
+  "configuration": {
+    "batch_size": 10,
+    "max_retries": 3,
+    "retry_delay": 5
+  },
+  "detailed_results": [
+    {
+      "symbol": "sh600519",
+      "mode": "full",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 2.304960012435913,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sh600519",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2026-01-06 至 2026-01-06",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sh600519",
+        "original_input": "600519.SH",
+        "exchange": "SH",
+        "market": "上海",
+        "pure_code": "600519"
+      },
+      "original_item": "600519.SH"
+    },
+    {
+      "symbol": "sz000001",
+      "mode": "full",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 2.135960578918457,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000001",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2026-01-06 至 2026-01-06",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz000001",
+        "original_input": "000001.SZ",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "000001"
+      },
+      "original_item": "000001.SZ"
+    },
+    {
+      "symbol": "sz000858",
+      "mode": "full",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.8409788608551025,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000858",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2026-01-06 至 2026-01-06",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz000858",
+        "original_input": "000858.SZ",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "000858"
+      },
+      "original_item": "000858.SZ"
+    },
+    {
+      "symbol": "sz000333",
+      "mode": "full",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.2869985103607178,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000333",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2026-01-06 至 2026-01-06",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sz000333",
+        "original_input": "000333.SZ",
+        "exchange": "SZ",
+        "market": "深圳",
+        "pure_code": "000333"
+      },
+      "original_item": "000333.SZ"
+    },
+    {
+      "symbol": "sh600036",
+      "mode": "full",
+      "status": "success",
+      "records_downloaded": 1,
+      "records_stored": 2,
+      "error": null,
+      "execution_time": 0.3179965019226074,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sh600036",
+        "records_processed": 1,
+        "records_affected": 2,
+        "date_range": "2026-01-06 至 2026-01-06",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      },
+      "symbol_info": {
+        "normalized_symbol": "sh600036",
+        "original_input": "600036.SH",
+        "exchange": "SH",
+        "market": "上海",
+        "pure_code": "600036"
+      },
+      "original_item": "600036.SH"
+    }
+  ],
+  "failed_symbols": [],
+  "successful_symbols": [
+    "sh600519",
+    "sz000001",
+    "sz000858",
+    "sz000333",
+    "sh600036"
+  ]
+}

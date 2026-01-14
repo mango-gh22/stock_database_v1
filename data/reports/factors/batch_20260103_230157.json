@@ -1,0 +1,102 @@
+{
+  "batch_id": "batch_20260103_230157",
+  "summary": {
+    "total_symbols": 3,
+    "successful": 3,
+    "failed": 0,
+    "skipped": 0,
+    "success_rate": 100.0,
+    "total_records": 25752,
+    "total_downloaded": 15306,
+    "total_stored": 25752,
+    "cache_hits": 0,
+    "retry_count": 0
+  },
+  "performance": {
+    "start_time": "2026-01-03T23:01:41.172503",
+    "end_time": "2026-01-03T23:01:57.143458",
+    "duration_seconds": 15.97,
+    "avg_execution_time_per_symbol": 4.32,
+    "symbols_per_second": 0.188,
+    "records_per_second": 1612.43
+  },
+  "configuration": {
+    "batch_size": 10,
+    "max_retries": 3,
+    "retry_delay": 5
+  },
+  "detailed_results": [
+    {
+      "symbol": "600519",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 5102,
+      "records_stored": 10204,
+      "error": null,
+      "execution_time": 4.90598464012146,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sh600519",
+        "records_processed": 5102,
+        "records_affected": 10204,
+        "date_range": "2004-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      }
+    },
+    {
+      "symbol": "000001",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 5102,
+      "records_stored": 10204,
+      "error": null,
+      "execution_time": 4.528994798660278,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000001",
+        "records_processed": 5102,
+        "records_affected": 10204,
+        "date_range": "2004-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      }
+    },
+    {
+      "symbol": "000858",
+      "mode": "incremental",
+      "status": "success",
+      "records_downloaded": 5102,
+      "records_stored": 5344,
+      "error": null,
+      "execution_time": 3.523998737335205,
+      "retry_count": 0,
+      "storage_report": {
+        "status": "success",
+        "symbol": "sz000858",
+        "records_processed": 5102,
+        "records_affected": 5344,
+        "date_range": "2004-12-31 至 2025-12-31",
+        "factor_fields": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ]
+      }
+    }
+  ],
+  "failed_symbols": [],
+  "successful_symbols": [
+    "600519",
+    "000001",
+    "000858"
+  ]
+}

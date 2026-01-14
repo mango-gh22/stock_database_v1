@@ -81,24 +81,24 @@ class BaseFactorDownloader:
         code_num = normalized_code[2:]
         return f"{market}.{code_num}"
 
-    def _is_valid_stock(self, bs_code: str) -> bool:
-        """验证是否为有效股票代码"""
-        if not bs_code or '.' not in bs_code:
-            return False
-
-        market, code = bs_code.split('.')
-
-        # 上证股票
-        if market == 'sh':
-            return code.startswith(('6', '9')) and not code.startswith(('000', '950', '951'))
-        # 深证股票
-        elif market == 'sz':
-            return code.startswith(('00', '30')) and not code.startswith('399')
-        # 北交所股票
-        elif market == 'bj':
-            return code.startswith(('43', '83', '87', '88'))
-
-        return False
+    # def _is_valid_stock(self, bs_code: str) -> bool:  # 重复验证，已在code_converter实现，删除此方法
+    #     """验证是否为有效股票代码"""
+    #     if not bs_code or '.' not in bs_code:
+    #         return False
+    #
+    #     market, code = bs_code.split('.')
+    #
+    #     # 上证股票
+    #     if market == 'sh':
+    #         return code.startswith(('6', '9')) and not code.startswith(('000', '950', '951'))
+    #     # 深证股票
+    #     elif market == 'sz':
+    #         return code.startswith(('00', '30')) and not code.startswith('399')
+    #     # 北交所股票
+    #     elif market == 'bj':
+    #         return code.startswith(('43', '83', '87', '88'))
+    #
+    #     return False
 
     def _enforce_rate_limit(self):
         """强制执行请求速率限制"""
@@ -123,7 +123,8 @@ class BaseFactorDownloader:
             logger.warning(f"⚠️ 日期格式异常: {date_str}")
             return date_str
 
-    def _safe_fetch_data(self, rs, max_rows: int = 10000) -> List:
+    # def _safe_fetch_data(self, rs, max_rows: int = 10000) -> List:
+    def _safe_fetch_data(self, rs) -> List:  # 删除了参数max_rows: int = 10000
         """安全获取数据，防止解压/解码错误"""
         data_list = []
         row_count = 0

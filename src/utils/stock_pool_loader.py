@@ -4,93 +4,137 @@
 # @ Author: mango-gh22
 # @ Date：2025/12/27 17:37
 """
-desc 
-"""
-# src/utils/stock_pool_loader.py
-# -*- coding: utf-8 -*-
-"""
-股票池加载器 - 支持从配置文件或数据库加载成分股
+desc 股票池加载器 - 支持从配置文件或数据库加载成分股
 """
 
-import os
-import yaml
+import sys
 from pathlib import Path
-from typing import List
+import yaml
+import logging
+import pandas as pd
+
+# 添加项目路径
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from src.config.config_loader import ConfigLoader
 from src.utils.code_converter import normalize_stock_code
-from src.config.pipeline_config_loader import get_pipeline_config
+from src.database.db_connector import DatabaseConnector
+
+logger = logging.getLogger(__name__)
 
 
-def load_a50_components() -> List[str]:
+def load_symbols_from_db():
     """
-    加载中证A50指数成分股列表（标准化格式：sh601318, sz300750...）
+    从数据库读取已存在的股票代码（用于因子更新）
 
-    优先级：
-    1. 从 config/symbols.yaml 中读取 csi_a50 列表
-    2. 若无，则返回空列表（需手动维护）
+    Returns:
+        List[str]: 标准化后的股票代码列表
     """
-    config = get_pipeline_config()
+    try:
+        db = DatabaseConnector()
 
-    # 获取 csi_a50 配置
-    a50_group = config.get('symbol_groups', {}).get('csi_a50', {})
-    symbols_source = a50_group.get('symbols_source')
+        with db.get_connection() as conn:
+            # 查询数据库中所有有数据的股票
+            df = pd.read_sql(
+                "SELECT DISTINCT symbol FROM stock_daily_data ORDER BY symbol",
+                conn
+            )
 
-    if not symbols_source:
-        raise ValueError("未配置 csi_a50 的 symbols_source")
+            if df.empty:
+                logger.warning("数据库中无股票数据")
+                return []
 
-    # 处理相对路径
-    if isinstance(symbols_source, str):
-        if symbols_source == 'database':
-            # TODO: 未来可对接数据库查询
-            raise NotImplementedError("数据库加载成分股暂未实现")
-        else:
-            # 假设是文件路径，如 'config/symbols.yaml'
-            symbols_path = Path(__file__).parent.parent.parent / symbols_source
-            if symbols_path.exists():
-                return _load_symbols_from_file(symbols_path)
+            # 标准化并去重
+            symbols = []
+            for symbol in df['symbol'].tolist():
+                try:
+                    normalized = normalize_stock_code(symbol)
+                    symbols.append(normalized)
+                except ValueError as e:
+                    logger.warning(f"股票代码转换失败 {symbol}: {e}")
+                    continue
+
+            # 去重并保持顺序
+            seen = set()
+            unique_symbols = []
+            for s in symbols:
+                if s not in seen:
+                    seen.add(s)
+                    unique_symbols.append(s)
+
+            logger.info(f"从数据库加载 {len(unique_symbols)} 只股票")
+            return unique_symbols
+
+    except Exception as e:
+        logger.error(f"从数据库加载股票失败: {e}", exc_info=True)
+        return []
+
+
+def load_a50_components(config_path: str = 'config/symbols.yaml') -> list:
+    """
+    从配置文件加载A50成分股（用于新增股票到数据库）
+
+    Args:
+        config_path: 配置文件路径
+
+    Returns:
+        标准化后的A50代码列表
+    """
+    try:
+        config = ConfigLoader.load_yaml_config(config_path)
+
+        if not config:
+            logger.error(f"无法加载配置文件: {config_path}")
+            return []
+
+        raw_symbols = config.get('csi_a50', [])
+        symbols = []
+
+        for item in raw_symbols:
+            if isinstance(item, dict) and 'symbol' in item:
+                raw_symbol = item['symbol']
+            elif isinstance(item, str):
+                raw_symbol = item
             else:
-                raise FileNotFoundError(f"成分股文件不存在: {symbols_path}")
+                continue
 
-        print("✅ 成分股加载成功，前3只:", normalized[:3])
-    return []
+            try:
+                normalized = normalize_stock_code(raw_symbol)
+                symbols.append(normalized)
+            except ValueError as e:
+                logger.warning(f"股票代码转换失败 {raw_symbol}: {e}")
+                continue
+
+        # 去重并保持顺序
+        seen = set()
+        unique_symbols = []
+        for s in symbols:
+            if s not in seen:
+                seen.add(s)
+                unique_symbols.append(s)
+
+        logger.info(f"从配置文件加载 {len(unique_symbols)} 只A50成分股")
+        return unique_symbols
+
+    except Exception as e:
+        logger.error(f"加载配置文件失败: {e}", exc_info=True)
+        return []
 
 
-def _load_symbols_from_file(file_path: Path) -> List[str]:
-    """从 YAML/CSV 文件加载股票代码"""
-    if file_path.suffix.lower() in ['.yaml', '.yml']:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f)
+def get_symbols(source: str = 'db'):
+    """
+    统一股票代码获取入口
 
-        symbols_raw = data.get('csi_a50', [])
+    Args:
+        source: 'db' (从数据库) 或 'config' (从配置文件)
 
-        # 新增：处理对象列表格式
-        if isinstance(symbols_raw, list) and len(symbols_raw) > 0:
-            if isinstance(symbols_raw[0], dict):
-                # 格式: [{symbol: "600519.SH", ...}, ...]
-                symbol_list = [item['symbol'] for item in symbols_raw if 'symbol' in item]
-            else:
-                # 格式: ["600519.SH", ...]
-                symbol_list = symbols_raw
-        else:
-            symbol_list = []
-
-    elif file_path.suffix.lower() == '.csv':
-        import pandas as pd
-        df = pd.read_csv(file_path)
-        # 假设第一列是代码，或有 'symbol' 列
-        if 'symbol' in df.columns:
-            symbol_list = df['symbol'].dropna().tolist()
-        else:
-            symbol_list = df.iloc[:, 0].dropna().tolist()
+    Returns:
+        List[str]: 股票代码列表
+    """
+    if source == 'db':
+        return load_symbols_from_db()
+    elif source == 'config':
+        return load_a50_components()
     else:
-        raise ValueError(f"不支持的文件格式: {file_path}")
-
-    # 标准化代码
-    normalized = []
-    for code in symbol_list:
-        try:
-            norm = normalize_stock_code(str(code))
-            normalized.append(norm)
-        except Exception as e:
-            print(f"⚠️ 跳过无效代码 {code}: {e}")
-
-    return list(dict.fromkeys(normalized))  # 去重保序
+        logger.warning(f"未知的代码源: {source}，默认使用数据库")
+        return load_symbols_from_db()

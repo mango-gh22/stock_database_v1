@@ -9,7 +9,6 @@ from mysql.connector import Error
 import yaml
 import os
 
-
 def setup_database():
     """设置MySQL数据库和用户"""
     try:

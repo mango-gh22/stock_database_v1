@@ -1,0 +1,80 @@
+{
+  "timestamp": "2025-12-12T22:53:18.880105",
+  "total_symbols": 3,
+  "success_count": 3,
+  "error_count": 0,
+  "success_rate": 100.0,
+  "date_range": {
+    "start": "20240101",
+    "end": "20240131"
+  },
+  "adjust_type": "qfq",
+  "details": [
+    {
+      "symbol": "sh600519",
+      "status": "SUCCESS",
+      "records": 31,
+      "quality": {
+        "symbol": "sh600519",
+        "total_score": 92.0,
+        "grade": "excellent",
+        "scores": {
+          "completeness": 100.0,
+          "accuracy": 100.0,
+          "consistency": 100.0,
+          "timeliness": 20.0
+        },
+        "issues": [
+          "数据不够及时"
+        ],
+        "record_count": 31,
+        "assessment_time": "2025-12-12T22:53:17.103101"
+      },
+      "storage_time": "2025-12-12T22:53:17.299101"
+    },
+    {
+      "symbol": "sz000001",
+      "status": "SUCCESS",
+      "records": 31,
+      "quality": {
+        "symbol": "sz000001",
+        "total_score": 92.0,
+        "grade": "excellent",
+        "scores": {
+          "completeness": 100.0,
+          "accuracy": 100.0,
+          "consistency": 100.0,
+          "timeliness": 20.0
+        },
+        "issues": [
+          "数据不够及时"
+        ],
+        "record_count": 31,
+        "assessment_time": "2025-12-12T22:53:17.889104"
+      },
+      "storage_time": "2025-12-12T22:53:18.117109"
+    },
+    {
+      "symbol": "sz000858",
+      "status": "SUCCESS",
+      "records": 31,
+      "quality": {
+        "symbol": "sz000858",
+        "total_score": 92.0,
+        "grade": "excellent",
+        "scores": {
+          "completeness": 100.0,
+          "accuracy": 100.0,
+          "consistency": 100.0,
+          "timeliness": 20.0
+        },
+        "issues": [
+          "数据不够及时"
+        ],
+        "record_count": 31,
+        "assessment_time": "2025-12-12T22:53:18.686107"
+      },
+      "storage_time": "2025-12-12T22:53:18.879104"
+    }
+  ]
+}

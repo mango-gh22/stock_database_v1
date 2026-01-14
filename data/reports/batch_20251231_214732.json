@@ -1,0 +1,239 @@
+{
+  "batch_id": "batch_20251231_214732",
+  "start_time": "2025-12-31T21:47:32.961530",
+  "end_time": "2025-12-31T21:47:32.978530",
+  "total_processing_time": 0.02,
+  "summary": {
+    "total_symbols": 20,
+    "success": 0,
+    "failed": 20,
+    "no_data": 0,
+    "total_records": 0
+  },
+  "performance": {
+    "symbols_per_second": 1176.49,
+    "records_per_second": 0.0
+  },
+  "detailed_results": [
+    {
+      "symbol": "sh600004",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600000",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600006",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600007",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600008",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600009",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600010",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600011",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600012",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600015",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600016",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600017",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600018",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600019",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600020",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600021",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600022",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600023",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600025",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    },
+    {
+      "symbol": "sh600026",
+      "status": "error",
+      "records_fetched": 0,
+      "records_stored": 0,
+      "processing_time": 0,
+      "quality_score": 0,
+      "errors": [
+        "'DataStorage' object has no attribute 'logger'"
+      ]
+    }
+  ]
+}

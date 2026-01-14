@@ -1,0 +1,45 @@
+# config/factor_config.yaml
+# PB等因子下载配置
+
+# 执行参数
+execution:
+  thread_num: 1                           # 线程数（P6阶段强制为1）
+  request_interval: 1.5                   # 请求间隔（秒）
+  max_retries: 3                          # 最大重试次数
+  retry_delay_base: 3                     # 重试基础延迟（秒）
+
+# 批量参数
+batch:
+  batch_size: 50                          # 每批处理的股票数
+  symbols_per_request: 100                # 单次API请求股票数（Baostock限制）
+  progress_report_interval: 10            # 进度报告间隔（股票数）
+
+# 日期范围
+date_range:
+  default_days_back: 365                  # 默认回溯天数
+  max_history_years: 5                    # 最大历史年份
+  full_update_months: 12                  # 全量更新间隔（月）
+
+# 存储参数
+storage:
+  table_name: "stock_daily_data"          # 目标表名
+  enable_incremental: true               # 启用增量更新
+  force_update: false                    # 强制全量更新
+  batch_insert_size: 500                 # 批量插入大小
+
+## 性能优化  删除: 冗余的性能监控配置（已迁移到 performance.yaml）
+#performance:
+#  enable_cache: true                     # 启用缓存
+#  cache_ttl: 3600                        # 缓存过期时间（秒）
+#  cache_dir: "data/cache/baostock/factors"
+
+# 监控日志
+monitoring:
+  enable_detailed_log: true              # 详细日志
+  log_level: "INFO"                      # 日志级别
+  save_report: true                      # 保存报告
+  report_dir: "data/reports/factors"
+
+# Baostock字段映射（关键配置）- 修正版 （删除: baostock_fields.daily_fields 中不存在的字段（pb_ttm, dv_ttm））
+baostock_fields:
+  daily_fields: "date,code,peTTM,pbMRQ,psTTM,pcfNcfTTM,turn,tradestatus"  # 修正字段

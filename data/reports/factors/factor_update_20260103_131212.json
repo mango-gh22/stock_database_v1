@@ -1,0 +1,26 @@
+{
+  "batch_id": "factor_update_20260103_131212",
+  "start_time": "2026-01-03T13:12:12.079798",
+  "total_symbols": 3,
+  "successful": 0,
+  "failed": 3,
+  "up_to_date": 0,
+  "no_data": 0,
+  "total_records_stored": 0,
+  "symbol_results": {
+    "600519": {
+      "status": "no_data",
+      "symbol": "600519"
+    },
+    "000001": {
+      "status": "no_data",
+      "symbol": "000001"
+    },
+    "000858": {
+      "status": "no_data",
+      "symbol": "000858"
+    }
+  },
+  "duration": 3.537999,
+  "end_time": "2026-01-03T13:12:15.617797"
+}

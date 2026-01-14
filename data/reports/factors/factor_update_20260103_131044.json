@@ -1,0 +1,49 @@
+{
+  "batch_id": "factor_update_20260103_131044",
+  "start_time": "2026-01-03T13:10:44.935806",
+  "total_symbols": 3,
+  "successful": 2,
+  "failed": 3,
+  "up_to_date": 0,
+  "no_data": 0,
+  "total_records_stored": 484,
+  "symbol_results": {
+    "600519": {
+      "status": "error",
+      "error": "name 'time' is not defined"
+    },
+    "000001": {
+      "status": "error",
+      "error": "name 'time' is not defined"
+    },
+    "000858": {
+      "symbol": "000858",
+      "date_range": {
+        "start": "20250103",
+        "end": "20260103"
+      },
+      "records_downloaded": 242,
+      "records_stored": 242,
+      "storage_report": {
+        "status": "success",
+        "records_processed": 242,
+        "records_affected": 242,
+        "symbols": [
+          "sz000858"
+        ],
+        "date_range": {
+          "start": "20250103",
+          "end": "20251231"
+        },
+        "factors_stored": [
+          "pe_ttm",
+          "pb",
+          "ps_ttm"
+        ],
+        "incremental_mode": true
+      }
+    }
+  },
+  "duration": 4.409997,
+  "end_time": "2026-01-03T13:10:49.345803"
+}

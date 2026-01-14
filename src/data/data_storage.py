@@ -82,6 +82,8 @@ class DataStorage:
             'pctChg': 'change_percent',
             'pct_change': 'change_percent',
             'change': 'change_amount',
+            'pcfNcfTTM': 'pcf_ttm',
+
 
             # 技术指标
             'turnoverrate': 'turnover_rate',  # ✅ 修正：换手率--总股本
@@ -231,15 +233,18 @@ class DataStorage:
             'pctChg': 'change_percent',
             'pct_change': 'change_percent',
             'change': 'change_amount',
+            'pcfNcfTTM': 'pcf_ttm',  # 注意：添加
+        
 
             # 技术指标
             'turn': 'turnover_rate_f',  # 同步修正
-            # 'turnoverrate': 'turnover_rate',
+            'turnoverrate': 'turnover_rate',
             'amplitude': 'amplitude',
 
             # 其他字段
             'adjustflag': 'adjust_flag',
             'tradestatus': 'trade_status'
+
         }
 
         # 应用字段映射
@@ -259,17 +264,24 @@ class DataStorage:
             'turnover_rate',
             'turnover_rate_f',  # ✅ 强制添加 turnover_rate_f
             'amplitude',
-            'change_amount', 'amplitude'
+            'change_amount',  'volume_ratio'
         ]
 
-        for field in numeric_fields:
-            if field in df_processed.columns:
-                try:
-                    # errors='coerce' 会将空字符串转为 NaN
-                    df_processed[field] = pd.to_numeric(df_processed[field], errors='coerce')
-                    logger.debug(f"数值转换 {field}: {df_processed[field].dtype}")
-                except Exception as e:
-                    logger.warning(f"数值转换失败 {field}: {e}")
+        # 确保从 Baostock 下载的因子字段也被转换
+        baostock_factor_fields = ['pe', 'pe_ttm', 'pb', 'ps', 'ps_ttm', 'pcf_ttm']
+        for field in baostock_factor_fields:
+            if field in df_processed.columns and field not in numeric_fields:
+                numeric_fields.append(field)
+
+
+        # for field in numeric_fields:
+        #     if field in df_processed.columns:
+        #         try:
+        #             # errors='coerce' 会将空字符串转为 NaN
+        #             df_processed[field] = pd.to_numeric(df_processed[field], errors='coerce')
+        #             logger.debug(f"数值转换 {field}: {df_processed[field].dtype}")
+        #         except Exception as e:
+        #             logger.warning(f"数值转换失败 {field}: {e}")
 
         # ✅ 额外清理：删除所有字段都为空的行（防御）可选，根据业务需求
         # 删除含有 NaN 的行（可选，根据业务需求）
