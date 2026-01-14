@@ -1,0 +1,104 @@
+{
+  "timestamp": "2026-01-14T19:05:21.016928",
+  "mode": "预览",
+  "project_root": "E:\\MyFile\\stock_database_v1",
+  "stats": {
+    "files": 13,
+    "dirs": 3,
+    "bytes": 230275,
+    "skipped": 3
+  },
+  "deleted_items": [
+    {
+      "path": "scripts\\test_complete_factor_system.py",
+      "type": "file",
+      "size": 13811,
+      "deleted_at": "2026-01-14T19:05:19.247924",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\test_complete_factor_system.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "scripts\\verify_factor_storage.py",
+      "type": "file",
+      "size": 9899,
+      "deleted_at": "2026-01-14T19:05:19.249921",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\verify_factor_storage.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "scripts\\fix_column_mapping.py",
+      "type": "file",
+      "size": 8973,
+      "deleted_at": "2026-01-14T19:05:19.250920",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\fix_column_mapping.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "scripts\\rollback_table_schema.py",
+      "type": "file",
+      "size": 4136,
+      "deleted_at": "2026-01-14T19:05:19.253922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\rollback_table_schema.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "scripts\\seed_test_data.py",
+      "type": "file",
+      "size": 4252,
+      "deleted_at": "2026-01-14T19:05:19.255926",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\seed_test_data.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "scripts\\diagnose_collations.py",
+      "type": "file",
+      "size": 12558,
+      "deleted_at": "2026-01-14T19:05:19.257922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\diagnose_collations.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "scripts\\quick_a50_fix_test.py",
+      "type": "file",
+      "size": 4363,
+      "deleted_at": "2026-01-14T19:05:19.258922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\scripts\\quick_a50_fix_test.py\" \"E:\\MyFile\\stock_database_v1\\scripts\""
+    },
+    {
+      "path": "test_factor_download.py",
+      "type": "file",
+      "size": 2472,
+      "deleted_at": "2026-01-14T19:05:19.259921",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\test_factor_download.py\" \"E:\\MyFile\\stock_database_v1\""
+    },
+    {
+      "path": "src\\query\\query_engine.py.backup",
+      "type": "file",
+      "size": 17251,
+      "deleted_at": "2026-01-14T19:05:19.261921",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\src\\query\\query_engine.py.backup\" \"E:\\MyFile\\stock_database_v1\\src\\query\""
+    },
+    {
+      "path": "src\\query\\query_engine.py.backup_reserved",
+      "type": "file",
+      "size": 7079,
+      "deleted_at": "2026-01-14T19:05:19.262922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\src\\query\\query_engine.py.backup_reserved\" \"E:\\MyFile\\stock_database_v1\\src\\query\""
+    },
+    {
+      "path": "src\\query\\query_engine.py.backup_standard",
+      "type": "file",
+      "size": 7079,
+      "deleted_at": "2026-01-14T19:05:19.264922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\src\\query\\query_engine.py.backup_standard\" \"E:\\MyFile\\stock_database_v1\\src\\query\""
+    },
+    {
+      "path": "stock_database_v0.5.1.zip",
+      "type": "file",
+      "size": 138372,
+      "deleted_at": "2026-01-14T19:05:20.773922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\stock_database_v0.5.1.zip\" \"E:\\MyFile\\stock_database_v1\""
+    },
+    {
+      "path": "stock_database_P5_completed_.tar.gz",
+      "type": "file",
+      "size": 30,
+      "deleted_at": "2026-01-14T19:05:20.886922",
+      "restore_cmd": "copy /b \"E:\\MyFile\\stock_database_v1\\backup_cleanup\\20260114_190519\\stock_database_P5_completed_.tar.gz\" \"E:\\MyFile\\stock_database_v1\""
+    }
+  ]
+}
