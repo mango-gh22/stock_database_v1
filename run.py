@@ -366,6 +366,33 @@ def cmd_report(args):
         return False
 
 
+def cmd_impute_factors(args):
+    """因子补全命令入口"""
+    from src.data.factor_imputation import FactorImputationEngine
+
+    engine = FactorImputationEngine()
+
+    if args.symbol and args.date:
+        # 单条补全
+        from datetime import datetime
+        trade_date = datetime.strptime(args.date, '%Y%m%d')
+        missing_fields = ['pb', 'pe_ttm', 'ps_ttm', 'pcf_ttm']
+
+        if args.dry_run:
+            should_impute, reason = engine.should_impute(args.symbol, trade_date, missing_fields)
+            print(f"模拟结果: {'应补全' if should_impute else '不补全'}")
+            print(f"原因: {reason}")
+        else:
+            values = engine.impute_factors(args.symbol, trade_date, missing_fields)
+            print(f"补全结果: {values}")
+    else:
+        # 批量补全最新数据
+        from src.data.factor_imputation import batch_impute_latest_data
+        batch_impute_latest_data()
+
+    return True
+
+
 # 工具函数：加载股票列表
 def load_symbols(source):
     """统一股票代码加载"""
@@ -431,6 +458,13 @@ def main():
     # report 命令
     parser_report = subparsers.add_parser('report', help='生成报告')
 
+    # 因子补全命令
+    parser_impute = subparsers.add_parser('impute-factors', help='智能补全缺失因子')
+    parser_impute.add_argument('--symbol', help='指定股票代码')
+    parser_impute.add_argument('--date', help='指定日期 (YYYYMMDD)')
+    parser_impute.add_argument('--dry-run', action='store_true', help='模拟运行，不实际补全')
+
+
     args = parser.parse_args()
 
     if not args.command:
@@ -450,6 +484,7 @@ def main():
         'query': cmd_query,
         'monitor': cmd_monitor,
         'report': cmd_report,
+        'impute-factors': cmd_impute_factors,  # ✅ 添加这行
     }
 
     success = cmd_map[args.command](args)

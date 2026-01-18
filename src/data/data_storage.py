@@ -154,8 +154,8 @@ class DataStorage:
             return default_cols
 
     def _preprocess_data(self, df: pd.DataFrame, table_name: str) -> pd.DataFrame:
-        """
-        预处理数据 - 完整修复版
+        """核心优化：因子字段防误删 + 代码结构简化
+        预处理数据 - v0.8.0 因子强制保留版
         """
         if df.empty:
             logger.warning("输入数据为空")
@@ -170,7 +170,6 @@ class DataStorage:
         symbol_created = False
 
         if 'code' in df_processed.columns:
-            # 格式转换: 'sh.600519' -> 'sh600519'
             df_processed['symbol'] = df_processed['code'].apply(
                 lambda x: str(x).replace('.', '') if pd.notna(x) else None
             )
@@ -178,7 +177,6 @@ class DataStorage:
             logger.debug(f"从 'code' 字段生成标准化 symbol")
 
         elif 'bs_code' in df_processed.columns:
-            # 同样处理 bs_code
             df_processed['symbol'] = df_processed['bs_code'].apply(
                 lambda x: str(x).replace('.', '') if pd.notna(x) else None
             )
@@ -186,7 +184,6 @@ class DataStorage:
             logger.debug(f"从 'bs_code' 字段生成标准化 symbol")
 
         elif 'symbol' in df_processed.columns:
-            # 如果已有 symbol 列，也进行标准化（防止已经是 sh.600519 格式）
             df_processed['symbol'] = df_processed['symbol'].apply(
                 lambda x: normalize_stock_code(str(x)) if pd.notna(x) else None
             )
@@ -196,7 +193,6 @@ class DataStorage:
         if not symbol_created:
             logger.error(f"❌ 预处理失败：找不到股票代码字段")
             return pd.DataFrame()
-
 
         # === 2. 日期字段处理 ===
         date_created = False
@@ -233,18 +229,16 @@ class DataStorage:
             'pctChg': 'change_percent',
             'pct_change': 'change_percent',
             'change': 'change_amount',
-            'pcfNcfTTM': 'pcf_ttm',  # 注意：添加
-        
+            'pcfNcfTTM': 'pcf_ttm',
 
             # 技术指标
-            'turn': 'turnover_rate_f',  # 同步修正
+            'turn': 'turnover_rate_f',
             'turnoverrate': 'turnover_rate',
             'amplitude': 'amplitude',
 
             # 其他字段
             'adjustflag': 'adjust_flag',
             'tradestatus': 'trade_status'
-
         }
 
         # 应用字段映射
@@ -257,166 +251,109 @@ class DataStorage:
             df_processed = df_processed.rename(columns=rename_map)
             logger.debug(f"字段映射: {rename_map}")
 
-        # === 4. 数据类型转换 ===
+        # === 4. ❌ 移除 Baostock 原始因子字段（避免命名冲突）===
+        # Baostock 返回的原始字段在映射后应删除
+        baostock_raw_fields = ['peTTM', 'pbMRQ', 'psTTM', 'pcfNcfTTM']
+        for field in baostock_raw_fields:
+            if field in df_processed.columns:
+                df_processed = df_processed.drop(columns=[field])
+                logger.debug(f"删除 Baostock 原始字段: {field}")
+
+
+        # === 5. 数据类型转换 ===
+        # ✅ 统一定义所有数值字段（包含因子）
         numeric_fields = [
             'open_price', 'high_price', 'low_price', 'close_price',
             'pre_close_price', 'volume', 'amount', 'change_percent',
-            'turnover_rate',
-            'turnover_rate_f',  # ✅ 强制添加 turnover_rate_f
-            'amplitude',
-            'change_amount',  'volume_ratio'
+            'turnover_rate', 'turnover_rate_f', 'amplitude',
+            'change_amount', 'volume_ratio',
+            # ✅ 核心因子字段
+            'pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm'
         ]
 
-        # 确保从 Baostock 下载的因子字段也被转换
-        baostock_factor_fields = ['pe', 'pe_ttm', 'pb', 'ps', 'ps_ttm', 'pcf_ttm']
-        for field in baostock_factor_fields:
-            if field in df_processed.columns and field not in numeric_fields:
+        # ✅ 动态添加其他可能存在的因子字段
+        additional_factors = ['pe', 'ps', 'dv_ratio', 'dv_ttm',
+                              'total_share', 'float_share', 'free_share', 'total_mv', 'circ_mv']
+        for field in additional_factors:
+            if field in df_processed.columns:
                 numeric_fields.append(field)
 
+        # 执行数值转换
+        for field in numeric_fields:
+            if field in df_processed.columns:
+                df_processed[field] = pd.to_numeric(df_processed[field], errors='coerce')
+                logger.debug(f"数值转换 {field}: {df_processed[field].notna().sum()} 条有效")
 
-        # for field in numeric_fields:
-        #     if field in df_processed.columns:
-        #         try:
-        #             # errors='coerce' 会将空字符串转为 NaN
-        #             df_processed[field] = pd.to_numeric(df_processed[field], errors='coerce')
-        #             logger.debug(f"数值转换 {field}: {df_processed[field].dtype}")
-        #         except Exception as e:
-        #             logger.warning(f"数值转换失败 {field}: {e}")
 
-        # ✅ 额外清理：删除所有字段都为空的行（防御）可选，根据业务需求
-        # 删除含有 NaN 的行（可选，根据业务需求）
-        df_processed = df_processed.dropna(subset=['turnover_rate_f'], how='any')
+        # === 6. ✅ 智能清理原始字段（明确保留因子）===
+        columns_to_remove = [
+            'code', 'bs_code', 'date', 'open', 'high', 'low', 'close',
+            'preclose', 'pctChg', 'turn', 'adjustflag', 'tradestatus'
+        ]
 
-        # === 5. 清理原始字段 ===
-        columns_to_remove = ['code', 'bs_code', 'date', 'open', 'high', 'low', 'close',
-                             'preclose', 'pctChg', 'turn', 'adjustflag', 'tradestatus']
+        # ✅ 因子保护列表（必须保留）
+        protected_fields = ['pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm'] + additional_factors
 
+        # 执行清理
         for col in columns_to_remove:
-            if col in df_processed.columns and col != 'symbol' and col != 'trade_date':
+            if col in df_processed.columns and col not in protected_fields:
                 df_processed = df_processed.drop(columns=[col])
+                logger.debug(f"删除原始字段: {col}")
 
-        # === 6. 按数据库表字段顺序排序 ===
-        db_column_order = self._get_table_column_order(table_name)
 
-        if db_column_order:
-            existing_columns = [col for col in db_column_order if col in df_processed.columns]
-
-            # 确保必需字段存在
-            required_fields = ['symbol', 'trade_date']
-            for req_field in required_fields:
-                if req_field not in existing_columns and req_field in df_processed.columns:
-                    existing_columns.insert(0, req_field) if req_field == 'symbol' else existing_columns.insert(1,
-                                                                                                                req_field)
-
-            df_processed = df_processed[existing_columns]
-            logger.debug(f"按数据库顺序排序: {existing_columns[:10]}...")
-        else:
-            logger.warning(f"⚠️ 无法获取表 {table_name} 的字段顺序，使用默认顺序")
-
-        # === 7. 过滤无效数据 ===
+        # === 6. 数据过滤（只删除关键字段为空的行）===
         before_filter = len(df_processed)
         df_processed = df_processed.dropna(subset=['symbol', 'trade_date'], how='any')
 
+        # 确保 symbol 不为空字符串
         if 'symbol' in df_processed.columns:
             df_processed = df_processed[df_processed['symbol'].notna() & (df_processed['symbol'] != '')]
 
         after_filter = len(df_processed)
         if before_filter > after_filter:
-            logger.info(f"过滤掉 {before_filter - after_filter} 条无效数据")
+            logger.info(f"过滤掉 {before_filter - after_filter} 条无效行")
 
-        if df_processed.empty:
-            logger.warning("过滤后无有效数据行")
-            return df_processed
-
-
-        # === 8. 日期格式化（关键修复） ===
+        # === 7. 日期格式标准化 ===
         if 'trade_date' in df_processed.columns:
-            try:
-                # 先确保是datetime类型（兼容多种输入格式）
-                if not pd.api.types.is_datetime64_any_dtype(df_processed['trade_date']):
-                    # 支持两种格式：YYYYMMDD 和 YYYY-MM-DD
-                    df_processed['trade_date'] = pd.to_datetime(
-                        df_processed['trade_date'],
-                        format='%Y%m%d',
-                        errors='coerce'
-                    )
-                    if df_processed['trade_date'].isna().all():
-                        # 如果YYYYMMDD解析失败，尝试标准格式
-                        df_processed['trade_date'] = pd.to_datetime(
-                            df_processed['trade_date'],
-                            errors='coerce'
-                        )
+            # 转换为 MySQL 标准格式
+            df_processed['trade_date'] = pd.to_datetime(
+                df_processed['trade_date'],
+                errors='coerce'
+            ).dt.strftime('%Y-%m-%d')
+            logger.debug("trade_date 已格式化为 YYYY-MM-DD")
 
-                # 转换为 MySQL 需要的 YYYY-MM-DD 格式字符串
-                df_processed['trade_date'] = df_processed['trade_date'].dt.strftime('%Y-%m-%d')
-                logger.debug("trade_date 已格式化为 YYYY-MM-DD")
-
-            except Exception as e:
-                logger.error(f"日期格式化失败: {e}")
-                # 如果失败，保持原始值但记录警告
-                logger.warning(f"日期列可能包含无效值: {df_processed['trade_date'].unique()[:5]}")
-
-
-
-        # === 9. 添加元数据字段 ===
+        # === 8. 添加元数据字段 ===
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        if 'processed_time' in df_processed.columns or 'processed_time' in self._get_table_columns(table_name):
-            df_processed['processed_time'] = current_time
-
-        if 'data_source' in df_processed.columns or 'data_source' in self._get_table_columns(table_name):
-            df_processed['data_source'] = 'baostock'
-
-        # === 10. 添加自动生成的时间戳 ===
-        if 'created_time' in self._get_table_columns(table_name) and 'created_time' not in df_processed.columns:
+        if 'created_time' in self._get_table_columns(table_name):
             df_processed['created_time'] = current_time
 
-        if 'updated_time' in self._get_table_columns(table_name) and 'updated_time' not in df_processed.columns:
+        if 'updated_time' in self._get_table_columns(table_name):
             df_processed['updated_time'] = current_time
 
-        # === 11. 最终验证 ===
-        final_columns = list(df_processed.columns)
-        logger.info(f"✅ 预处理完成: {len(df_processed)} 条记录")
-        logger.debug(f"最终字段 ({len(final_columns)}个): {final_columns}")
-
-        if not df_processed.empty:
-            sample_symbol = df_processed['symbol'].iloc[0]
-            sample_date = df_processed['trade_date'].iloc[0] if 'trade_date' in df_processed.columns else 'N/A'
-            logger.debug(f"样本数据: {sample_symbol}, {sample_date}")
-
-        # === 12. 计算量比（成交量比）===
+        # === 9. 计算衍生字段（量比、振幅）===
+        # 计算量比（volume_ratio）
         if 'volume' in df_processed.columns and len(df_processed) > 5:
-            # 计算过去5日平均成交量（不包含当日）
             df_processed['volume_ratio'] = (
                     df_processed['volume'] /
                     df_processed['volume'].shift(1).rolling(5, min_periods=1).mean()
-            )
+            ).fillna(1.0).clip(0, 50)
+            logger.debug(f"计算量比: 均值={df_processed['volume_ratio'].mean():.2f}")
 
-            # 处理前5天的 NaN（用1.0填充，表示正常水平）
-            df_processed['volume_ratio'] = df_processed['volume_ratio'].fillna(1.0)
-
-            # 限制极值（防止异常波动）
-            df_processed['volume_ratio'] = df_processed['volume_ratio'].clip(0, 50)
-
-            logger.debug(
-                f"计算量比: 均值={df_processed['volume_ratio'].mean():.2f}, 最大={df_processed['volume_ratio'].max():.2f}")
-
-        # === 13. 计算振幅（amplitude）===
+        # 计算振幅（amplitude）
         if all(col in df_processed.columns for col in ['high_price', 'low_price', 'pre_close_price']):
-            # 振幅 = (最高价 - 最低价) / 前收盘价 * 100%
             df_processed['amplitude'] = (
                     (df_processed['high_price'] - df_processed['low_price']) /
                     df_processed['pre_close_price'] * 100
             ).round(4)
+            logger.debug(f"计算振幅: 均值={df_processed['amplitude'].mean():.2f}%")
 
-            # 处理前收盘价为0或NaN的情况
-            df_processed.loc[
-                df_processed['pre_close_price'].eq(0) | df_processed['pre_close_price'].isna(),
-                'amplitude'
-            ] = 0
+        # === 10. 最终验证 ===
+        factor_cols = [col for col in ['pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm'] if col in df_processed.columns]
+        logger.info(f"✅ 因子字段保留验证: {len(factor_cols)}个 -> {factor_cols}")
 
-            logger.debug(
-                f"计算振幅: 均值={df_processed['amplitude'].mean():.2f}%, 最大={df_processed['amplitude'].max():.2f}%")
+        logger.info(f"✅ 预处理完成: {len(df_processed)} 条记录, {len(df_processed.columns)} 个字段")
+        logger.debug(f"最终字段: {list(df_processed.columns)}")
 
         return df_processed
 

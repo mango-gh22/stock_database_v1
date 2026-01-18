@@ -3,7 +3,7 @@
 # File Name: calculate_technical_indicators
 # @ Author: mango-gh22
 # @ Date：2026/1/9 22:01
-# @ Date: 2026/1/10 (优化版)
+# @ Date: 2026/1/10 (优化版)--2026/1/18 11:35 完全重构（修复版）
 """
 desc 计算技术指标批量计算脚本 v1.1.0--优化性能 + 进度显示 + 断点续算
 v1.1.1 (修复版)--除错误的 db.close() 调用
@@ -11,11 +11,12 @@ v1.1.1 (修复版)--除错误的 db.close() 调用
 技术指标批量计算脚本 v1.1.3 (修复作用域错误)
 """
 
+
 import sys
 import os
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,44 +29,59 @@ logger = setup_logging()
 
 
 def calculate_for_symbol(symbol, db=None):
-    """单只股票指标计算（修复作用域错误）"""
+    """重构版：单只股票指标计算（利用历史数据，只更新空指标）"""
     if db is None:
         db = DatabaseConnector()
 
-    updated_count = 0  # 初始化返回值
+    updated_count = 0
 
     try:
         with db.get_connection() as conn:
-            # 查询未计算的数据
+            # ✅ 步骤1：查询所有价格数据（用于计算指标）
             with conn.cursor(dictionary=True) as cursor:
                 cursor.execute("""
-                    SELECT trade_date, close_price, volume, high_price, low_price
+                    SELECT trade_date, close_price, volume, high_price, low_price, pre_close_price
                     FROM stock_daily_data 
-                    WHERE symbol = %s AND ma5 IS NULL
-                    ORDER BY trade_date
+                    WHERE symbol = %s 
+                      AND close_price IS NOT NULL 
+                      AND trade_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY)
+                    ORDER BY trade_date ASC
                 """, (symbol,))
-                data = cursor.fetchall()
+                all_data = cursor.fetchall()
 
-            if not data or len(data) < 20:
+            if not all_data or len(all_data) < 5:  # ✅ 最低要求降至5条（MA5计算需要）
+                logger.warning(f"  {symbol}: 数据不足（{len(all_data) if all_data else 0}条），跳过")
                 return 0
 
-            # 转换为DataFrame
-            df = pd.DataFrame(data)
+            # ✅ 步骤2：查询需要更新的日期（指标为空）
+            with conn.cursor(dictionary=True) as cursor:
+                cursor.execute("""
+                    SELECT trade_date 
+                    FROM stock_daily_data 
+                    WHERE symbol = %s 
+                      AND (ma5 IS NULL OR ma5 = 0 OR ma5 = '')
+                    ORDER BY trade_date
+                """, (symbol,))
+                pending_dates = {row['trade_date'].strftime('%Y-%m-%d') for row in cursor.fetchall()}
+
+            if not pending_dates:
+                logger.info(f"  {symbol}: 无待更新指标")
+                return 0
+
+            logger.debug(f"  {symbol}: 待更新日期数 {len(pending_dates)}")
+
+            # ✅ 步骤3：转换为DataFrame并预处理
+            df = pd.DataFrame(all_data)
 
             # 类型转换
-            numeric_cols = ['close_price', 'volume', 'high_price', 'low_price']
+            numeric_cols = ['close_price', 'volume', 'high_price', 'low_price', 'pre_close_price']
             for col in numeric_cols:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
 
-            df = df.dropna(subset=['close_price'])
-
-            if len(df) < 20:
-                return 0
-
             df['trade_date'] = pd.to_datetime(df['trade_date'])
-            df = df.sort_values('trade_date')
+            df = df.sort_values('trade_date').reset_index(drop=True)
 
-            # 批量计算
+            # ✅ 步骤4：批量计算所有指标（向量化运算）
             close_series = df['close_price']
             volume_series = df['volume']
 
@@ -85,33 +101,41 @@ def calculate_for_symbol(symbol, db=None):
 
             # RSI
             delta = close_series.diff()
-            gain = delta.where(delta > 0, 0).rolling(14).mean()
-            loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+            gain = delta.where(delta > 0, 0).rolling(14, min_periods=1).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(14, min_periods=1).mean()
             rs = gain / loss.replace(0, np.nan)
             df['rsi'] = 100 - (100 / (1 + rs))
 
             # 布林带
-            df['bb_middle'] = close_series.rolling(20).mean()
-            bb_std = close_series.rolling(20).std()
+            df['bb_middle'] = close_series.rolling(20, min_periods=1).mean()
+            bb_std = close_series.rolling(20, min_periods=1).std()
             df['bb_upper'] = df['bb_middle'] + (bb_std * 2)
             df['bb_lower'] = df['bb_middle'] - (bb_std * 2)
 
             # 波动率
-            df['volatility_20d'] = close_series.pct_change().rolling(20).std() * np.sqrt(252)
+            df['volatility_20d'] = close_series.pct_change().rolling(20, min_periods=1).std() * np.sqrt(252)
 
-            # ✅ 修复：在正确的作用域内准备更新数据
+            # ✅ 步骤5：只提取待更新日期的数据
+            df['trade_date_str'] = df['trade_date'].dt.strftime('%Y-%m-%d')
+            df_to_update = df[df['trade_date_str'].isin(pending_dates)].copy()
+
+            if df_to_update.empty:
+                logger.info(f"  {symbol}: 无匹配待更新日期的计算结果")
+                return 0
+
+            # ✅ 步骤6：准备更新记录
             update_records = []
-            for _, row in df.iterrows():
+            for _, row in df_to_update.iterrows():
                 record = tuple(
                     None if pd.isna(row[col]) else float(row[col])
                     for col in ['ma5', 'ma10', 'ma20', 'ma30', 'ma60', 'ma120', 'ma250',
                                 'volume_ma5', 'volume_ma10', 'volume_ma20',
                                 'rsi', 'bb_middle', 'bb_upper', 'bb_lower',
                                 'volatility_20d']
-                ) + (symbol, row['trade_date'].strftime('%Y-%m-%d'))
+                ) + (symbol, row['trade_date_str'])
                 update_records.append(record)
 
-            # ✅ 修复：确保 update_records 在作用域内
+            # ✅ 步骤7：执行批量更新
             if update_records:
                 with conn.cursor() as cursor:
                     cursor.executemany("""
@@ -130,6 +154,7 @@ def calculate_for_symbol(symbol, db=None):
                     updated_count = cursor.rowcount
 
                 conn.commit()
+                logger.info(f"  {symbol}: 更新 {updated_count}/{len(pending_dates)} 条记录")
 
             return updated_count
 
@@ -147,35 +172,37 @@ def calculate_all_indicators():
     db = DatabaseConnector()
 
     try:
-        # 获取需要计算的股票列表
+        # ✅ 查询需要计算的股票（明确排除已计算的）
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT DISTINCT symbol FROM stock_daily_data WHERE ma5 IS NULL"
-                )
-                symbols_to_calc = [row[0] for row in cursor.fetchall()]
+            with conn.cursor(dictionary=True) as cursor:
+                cursor.execute("""
+                    SELECT symbol, COUNT(*) as pending_count
+                    FROM stock_daily_data 
+                    WHERE (ma5 IS NULL OR ma5 = 0 OR ma5 = '')
+                      AND close_price IS NOT NULL
+                      AND trade_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                    GROUP BY symbol
+                    ORDER BY pending_count DESC
+                """)
+                rows = cursor.fetchall()
 
-            total_symbols = len(symbols_to_calc)
+                symbols_to_calc = [row['symbol'] for row in rows]
+                total_pending = sum(row['pending_count'] for row in rows)
 
-            if total_symbols == 0:
-                print("✅ 所有技术指标已计算完成")
-                return True
+        total_symbols = len(symbols_to_calc)
 
-            print(f"发现 {total_symbols} 只股票需要计算")
+        if total_symbols == 0:
+            print("✅ 所有技术指标已计算完成")
+            return True
 
-            # 统计待计算记录数
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT COUNT(*) FROM stock_daily_data WHERE ma5 IS NULL")
-                total_pending = cursor.fetchone()[0]
+        print(f"发现 {total_symbols} 只股票需要计算 (总待计算记录: {total_pending:,} 条)")
 
-            print(f"总待计算记录: {total_pending:,} 条")
+        confirm = input("\n开始计算吗？(y/n): ").lower()
+        if confirm not in ['y', 'yes']:
+            print("操作已取消")
+            return True
 
-            confirm = input("\n开始计算吗？(y/n): ").lower()
-            if confirm not in ['y', 'yes']:
-                print("操作已取消")
-                return True
-
-        # 逐只股票计算，创建独立连接
+        # ✅ 逐只股票计算
         success_count = 0
         total_updated = 0
 
@@ -183,14 +210,15 @@ def calculate_all_indicators():
             try:
                 print(f"\n[{i}/{total_symbols}] {symbol}", end=' ')
 
-                # 每次调用创建独立连接
-                updated = calculate_for_symbol(symbol)
+                # 复用数据库连接
+                updated = calculate_for_symbol(symbol, db=db)
                 total_updated += updated
-
-                print(f"✅ 更新 {updated} 条")
 
                 if updated > 0:
                     success_count += 1
+                    print(f"✅ 更新 {updated} 条")
+                else:
+                    print(f"⏭️  无更新")
 
             except Exception as e:
                 logger.error(f"计算失败 {symbol}: {e}", exc_info=True)
@@ -203,33 +231,8 @@ def calculate_all_indicators():
         print(f"总更新记录: {total_updated:,}")
         print("=" * 60)
 
-        return success_count > 0
+        return total_updated > 0
 
     finally:
-        # 不需要关闭 db
+        # 连接池会自动管理，无需关闭
         pass
-
-
-def main():
-    """命令行入口"""
-    parser = argparse.ArgumentParser(description='技术指标计算')
-    parser.add_argument('--symbol', help='指定股票代码')
-
-    args = parser.parse_args()
-
-    if args.symbol:
-        # 单只股票计算
-        print(f"计算股票: {args.symbol}")
-        updated = calculate_for_symbol(args.symbol)
-        print(f"更新 {updated} 条记录")
-        return 0 if updated > 0 else 1
-    else:
-        # 全部计算
-        success = calculate_all_indicators()
-        return 0 if success else 1
-
-
-if __name__ == "__main__":
-    import argparse
-
-    sys.exit(main())

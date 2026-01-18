@@ -1,0 +1,39 @@
+# 因子补全策略配置
+
+# 补全模式
+imputation_mode: "conditional"  # none:不补全, conditional:条件补全, aggressive:强制补全
+
+# 条件规则
+conditional_rules:
+  # 规则1：新股上市初期（<30天）不补全（估值不稳定）
+  new_stock_threshold: 30  # 天
+
+  # 规则2：停牌期间不补全（因子无意义）
+  skip_suspended: true
+
+  # 规则3：异常值（PB>50或PE>500）不补全（数据异常）
+  pb_max_threshold: 50
+  pe_max_threshold: 500
+
+  # 规则4：连续缺失>10天不补全（可能退市）
+  max_consecutive_missing_days: 10
+
+# 可补全场景
+allowable_scenarios:
+  # 场景1：单日缺失（网络/接口问题）
+  single_day_missing: true
+
+  # 场景2：少数股票缺失（<5只股票）
+  minority_stocks_missing: true
+
+  # 场景3：最新数据缺失（必须补全）
+  latest_data_missing: true
+
+# 补全方法
+imputation_method: "forward_fill"  # forward_fill:前值填充, industry_avg:行业均值
+
+# 日志审计
+audit_log:
+  enabled: true
+  log_imputation_details: true
+  log_file: "logs/factor_imputation.log"

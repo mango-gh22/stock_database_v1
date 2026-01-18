@@ -10,6 +10,7 @@ desc Baostock 日线数据下载器 - 生产稳定版
 
 import baostock as bs
 import pandas as pd
+import numpy as np
 import time
 import random
 import logging
@@ -106,7 +107,7 @@ class BaostockDailyDownloader:
             max_retries: int = 3
     ) -> Optional[pd.DataFrame]:
         """
-        稳定下载单只股票日线数据（核心方法）
+        稳定下载单只股票日线数据（核心方法）- v0.7.0 修复版
 
         Args:
             symbol: 股票代码，支持多种格式 (600519, sh600519, 600519.SH)
@@ -136,9 +137,13 @@ class BaostockDailyDownloader:
 
             try:
                 logger.debug(f"📥 请求 {bs_code} [{start_fmt} ~ {end_fmt}] (尝试 {attempt + 1})")
+
+                # ✅ 明确指定所有字段（含因子字段）
+                fields = "date,code,open,high,low,close,preclose,volume,amount,pctChg,turn,tradestatus,peTTM,pbMRQ,psTTM,pcfNcfTTM"
+
                 rs = bs.query_history_k_data_plus(
                     code=bs_code,
-                    fields="date,code,open,high,low,close,preclose,volume,amount,pctChg,turn,tradestatus",
+                    fields=fields,
                     start_date=start_fmt,
                     end_date=end_fmt,
                     frequency="d",
@@ -157,14 +162,26 @@ class BaostockDailyDownloader:
                         logger.warning(f"⚠️ 跳过损坏行: {row_e}")
                         continue
 
-                if not data_list:
-                    logger.warning(f"⚠️ {symbol} 无返回数据")
+                # ✅ 强化空数据判断
+                if not data_list or len(data_list) == 0:
+                    logger.warning(f"⚠️ {symbol} 无返回数据（数据长度为0）")
                     return None
 
+                # ✅ 创建 DataFrame 并验证完整性
                 df = pd.DataFrame(data_list, columns=rs.fields)
 
-                # 列重命名（匹配 DataStorage.column_mapping）
-                df.rename(columns={
+                if df.empty or len(df.columns) == 0:
+                    logger.warning(f"⚠️ {symbol} DataFrame为空或无效")
+                    return None
+
+                # ✅ 关键验证：确保必需的 'date' 列存在
+                if 'date' not in df.columns:
+                    logger.error(f"❌ Baostock返回数据缺少 'date' 列，可用列: {list(df.columns)}")
+                    logger.error(f"❌ 请求字段: {fields}")
+                    return None
+
+                # ✅ 列重命名（统一定义）
+                rename_dict = {
                     'date': 'trade_date',
                     'code': 'bs_code',
                     'open': 'open_price',
@@ -174,26 +191,86 @@ class BaostockDailyDownloader:
                     'preclose': 'pre_close_price',
                     'volume': 'volume',
                     'amount': 'amount',
-                    'pctChg': 'change_percent',  # 统一字段名
-                    'turn': 'turnover_rate_f',  # ✅ 修正：流通换手率
-                    'tradestatus': 'trade_status'
-                }, inplace=True)
+                    'pctChg': 'change_percent',
+                    'turn': 'turnover_rate_f',
+                    'tradestatus': 'trade_status',
+                    # ✅ 新增因子字段映射（确保与 Baostock 字段一致）
+                    'peTTM': 'pe_ttm',
+                    'pbMRQ': 'pb',
+                    'psTTM': 'ps_ttm',
+                    'pcfNcfTTM': 'pcf_ttm',
+                }
 
-                # 添加标准化股票代码
-                df['symbol'] = normalize_stock_code(symbol)
+                # 只重命名存在的列，避免 KeyError
+                actual_rename = {k: v for k, v in rename_dict.items() if k in df.columns}
+                df = df.rename(columns=actual_rename)
+                logger.debug(f"✅ 列重命名完成: {len(actual_rename)} 个字段被映射")
 
-                # 日期转换为 YYYYMMDD (数据库标准格式)
-                df['trade_date'] = df['trade_date'].str.replace('-', '')
+                # ✅ 强制验证：重命名后检查必需列
+                required_cols = ['trade_date', 'close_price']
+                for col in required_cols:
+                    if col not in df.columns:
+                        logger.error(f"❌ 必需列 '{col}' 不存在，当前列: {list(df.columns)}")
+                        return None
 
-                # 数值列转换
-                num_cols = ['open_price', 'high_price', 'low_price', 'close_price',
-                            'pre_close_price', 'volume', 'amount', 'change_percent', 'turnover_rate_f']
-                for col in num_cols:
+                # ✅ 生成标准化股票代码（兼容多种情况）
+                if 'bs_code' in df.columns:
+                    df['symbol'] = df['bs_code'].apply(lambda x: normalize_stock_code(str(x)))
+                    logger.debug(f"从 bs_code 生成标准化 symbol")
+                elif 'code' in df.columns:
+                    df['symbol'] = df['code'].apply(lambda x: normalize_stock_code(str(x)))
+                    logger.debug(f"从 code 生成标准化 symbol")
+                else:
+                    df['symbol'] = normalize_stock_code(symbol)
+                    logger.debug(f"使用参数 symbol: {symbol}")
+
+                # ✅ 转换日期格式（YYYYMMDD -> YYYY-MM-DD）
+                if 'trade_date' in df.columns:
+                    # 确保是字符串
+                    df['trade_date'] = df['trade_date'].astype(str)
+                    # 移除分隔符
+                    df['trade_date'] = df['trade_date'].str.replace('-', '')
+                    # 转换为标准格式
+                    df['trade_date'] = pd.to_datetime(df['trade_date'], format='%Y%m%d', errors='coerce')
+                    df['trade_date'] = df['trade_date'].dt.strftime('%Y-%m-%d')
+
+                # ✅ 数值列转换（包含因子字段）
+                numeric_cols = [
+                    'open_price', 'high_price', 'low_price', 'close_price',
+                    'pre_close_price', 'volume', 'amount', 'change_percent',
+                    'turnover_rate_f', 'pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm'
+                ]
+
+                for col in numeric_cols:
                     if col in df.columns:
+                        # 先清理可能存在的 "--" 或空字符串
+                        df[col] = df[col].replace(['--', '', 'None'], np.nan)
                         df[col] = pd.to_numeric(df[col], errors='coerce')
                         logger.debug(f"{col} 转换后 NaN 数量: {df[col].isna().sum()}")
-                # ✅ 防御：删除 turnover_rate_f 为空的行（可选，视数据完整性要求）
-                # df = df.dropna(subset=['turnover_rate_f'])
+
+                        # ✅ 因子字段特殊处理：如果全为NaN，尝试从其他字段获取
+                        if col in ['pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm'] and df[col].isna().all():
+                            # 检查是否有同义字段
+                            synonym_map = {
+                                'pe_ttm': ['peTTM', 'pe'],
+                                'pb': ['pbMRQ', 'pb'],
+                                'ps_ttm': ['psTTM', 'ps'],
+                                'pcf_ttm': ['pcfNcfTTM', 'pcf']
+                            }
+
+                            for syn in synonym_map.get(col, []):
+                                if syn in df.columns:
+                                    df[col] = pd.to_numeric(df[syn], errors='coerce')
+                                    logger.info(f"从同义字段 {syn} 恢复 {col}: {df[col].notna().sum()} 条")
+                                    break
+
+
+                # ✅ 删除无效行（symbol 或 trade_date 为空）
+                before_filter = len(df)
+                df = df.dropna(subset=['symbol', 'trade_date'], how='any')
+                after_filter = len(df)
+                if before_filter > after_filter:
+                    logger.debug(f"过滤掉 {before_filter - after_filter} 条无效行")
 
                 logger.info(f"✅ {symbol}: 获取 {len(df)} 条记录")
                 return df
@@ -202,14 +279,20 @@ class BaostockDailyDownloader:
                 err_str = str(e).lower()
                 wait_sec = 3 + attempt * 2 + random.uniform(0, 1)
 
-                # 对编码/解压错误加倍等待
-                if any(kw in err_str for kw in ['utf', 'codec', 'decompress', 'invalid']):
+                # 对特定错误类型增加等待时间
+                if any(kw in err_str for kw in ['utf', 'codec', 'decompress', 'invalid', 'timeout']):
                     wait_sec *= 2
 
-                logger.warning(f"⚠️ 尝试 {attempt + 1} 失败 ({type(e).__name__}): {str(e)[:80]} → 等待 {wait_sec:.1f}s")
-                time.sleep(wait_sec)
+                logger.warning(
+                    f"⚠️ 尝试 {attempt + 1}/{max_retries} 失败 ({type(e).__name__}): {str(e)[:100]} → 等待 {wait_sec:.1f}s")
 
-        logger.error(f"❌ {symbol} 所有重试失败")
+                if attempt < max_retries - 1:
+                    time.sleep(wait_sec)
+                else:
+                    logger.error(f"❌ {symbol} 所有重试均失败")
+                    return None
+
+        logger.error(f"❌ {symbol} 超出最大重试次数")
         return None
 
     def download_batch(

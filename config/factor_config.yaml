@@ -27,6 +27,13 @@ storage:
   force_update: false                    # 强制全量更新
   batch_insert_size: 500                 # 批量插入大小
 
+## 添加因子字段到存储配置
+#storage:
+  # 确保这些字段在数据库中存在
+  factor_fields: ['pe_ttm', 'pb', 'ps_ttm', 'pcf_ttm', 'turnover_rate_f']
+
+
+
 ## 性能优化  删除: 冗余的性能监控配置（已迁移到 performance.yaml）
 #performance:
 #  enable_cache: true                     # 启用缓存
@@ -41,5 +48,9 @@ monitoring:
   report_dir: "data/reports/factors"
 
 # Baostock字段映射（关键配置）- 修正版 （删除: baostock_fields.daily_fields 中不存在的字段（pb_ttm, dv_ttm））
+#baostock_fields:
+#  daily_fields: "date,code,peTTM,pbMRQ,psTTM,pcfNcfTTM,turn,tradestatus"  # 修正字段
+#
+## 确保 baostock_fields.daily_fields 完整（修正字段名）
 baostock_fields:
-  daily_fields: "date,code,peTTM,pbMRQ,psTTM,pcfNcfTTM,turn,tradestatus"  # 修正字段
+  daily_fields: "date,code,open,high,low,close,preclose,volume,amount,pctChg,turn,tradestatus,peTTM,pbMRQ,psTTM,pcfNcfTTM"
